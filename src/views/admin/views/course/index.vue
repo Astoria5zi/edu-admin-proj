@@ -2,7 +2,8 @@
 	<!-- 展示教师列表以及操作 -->
 	<div v-if="!isAdd" class="teacher-table">
 		<!-- 搜索框 -->
-		<el-input placeholder="输入课程名称" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" />
+		<el-input placeholder="输入课程名称" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords"
+			 />
 
 		<!-- 添加课程按钮 -->
 		<el-button type="primary" size="default" @click="isAdd = true" style="margin: 10px;">添加课程</el-button>
@@ -23,7 +24,8 @@
 					<el-button type="primary" size="small" @click="" icon="Plus" title="添加SKU"></el-button>
 					<el-button type="primary" size="small" @click="" icon="Edit" title="修改SPU"></el-button>
 					<el-button type="primary" size="small" @click="" icon="Search" title="查看SKU"></el-button>
-					<el-button type="danger" size="small" @click="removeCourse(row.id)" icon="Delete" title="删除SPU"></el-button>
+					<el-button type="danger" size="small" @click="removeCourse(row.id)" icon="Delete"
+						title="删除SPU"></el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -31,8 +33,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
-				@current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -72,7 +74,7 @@
 </template>
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 // 获取课程相关接口
 import { reqCourseList } from '@/api/course';
@@ -90,7 +92,7 @@ let isAdd = ref(false)
 let coursesArr = ref([])
 // 搜索框关键字
 let keyWords = ref('')
-// 计算属性教师列表
+// 计算属性课程列表
 const computedCoursesArr = computed(() => {
 	return coursesArr.value.filter((item: any) => {
 		return item.name.includes(keyWords.value)
@@ -112,6 +114,12 @@ const getCourses = async () => {
 // 组件挂载时获取教师信息
 onMounted(() => {
 	getCourses()
+})
+
+// 搜索框关键字发生变化
+watch(computedCoursesArr, () => {
+	console.log(computedCoursesArr.value);
+	
 })
 
 // 删除按钮回调

@@ -1,7 +1,7 @@
 <template>
     <div class="logo">
-        <img src="@/static/images/LOGO/logo.png" alt="">
-        <p>xxxx教育培训管理系统</p>
+        <img src="@/static/images/LOGO/logo2.png" alt="">
+        <p>教育培训管理系统</p>
     </div>
 </template>
     

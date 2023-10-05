@@ -11,7 +11,9 @@ enum API {
     // 根据教师id获得信息接口
     GETTEACHERBYID = "/teacher/",
     // 修改教师信息接口
-    EDITTEACHER = "/teacher/update"
+    EDITTEACHER = "/teacher/update",
+    // 根据name获取教师信息
+    GETTEARCHERBYNAME = "/teacher/find/"
 
 }
 
@@ -28,4 +30,7 @@ export const reqAddTeacher = (userDTO: any) => request.post<any, any>(API.ADDTEA
 export const reqGetTeacherByID = (id: number) => request.get<any, any>(API.GETTEACHERBYID + `${id}`)
 
 // 修改教师信息
-export const reqEditTeacher = (data:any) => request.put<any, any>(API.EDITTEACHER,data)
+export const reqEditTeacher = (data: any) => request.put<any, any>(API.EDITTEACHER, data)
+
+// 根据name获取教师信息
+export const reqGetTeacherByName = (name: string) => request.get<any, any>(API.GETTEARCHERBYNAME + `${name}`)

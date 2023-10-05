@@ -2,13 +2,14 @@
 	<!-- 展示教师列表以及操作 -->
 	<div v-if="!isAdd" class="teacher-table">
 		<!-- 搜索框 -->
-		<el-input placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" />
+		<el-input @change="textChange" placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;"
+			v-model="keyWords" />
 
 		<!-- 添加教师按钮 -->
 		<el-button type="primary" size="default" @click="isAdd = true" style="margin: 10px;">添加教师</el-button>
 
 		<!-- 展示教师列表 -->
-		<el-table :data="computedTeachersArr" border style="width: 100%">
+		<el-table :data="teachersArr" border style="width: 100%">
 			<el-table-column label="序号" type="index" algin="center" width="80"></el-table-column>
 			<el-table-column prop="id" label="编号" width="80" />
 			<el-table-column prop="name" label="姓名" width="80" />
@@ -86,7 +87,7 @@
 import { Search } from '@element-plus/icons-vue'
 import { computed, onMounted, reactive, ref } from 'vue';
 // 获取教师相关接口
-import { reqGetTeacherList, reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher } from '@/api/teacher'
+import { reqGetTeacherList, reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
 
 
 // 当前页码
@@ -107,12 +108,14 @@ const computedTeachersArr = computed(() => {
 		return item.name.includes(keyWords.value)
 	})
 })
+
 // 定义标志判断是修改还是新增
 let editFlag = ref(false)
 
 // 封装获取教师信息方法
 const getTeachers = async () => {
 	let result = await reqGetTeacherList(pageNo.value, pageSize.value)
+	console.log(result);
 
 	teachersArr.value = result.items
 	total.value = result.counts
@@ -172,8 +175,19 @@ const onEdit = async () => {
 	isAdd.value = false
 }
 
-
-
+// 查询文本框发生变化（有bug，未解决）
+const textChange = async () => {
+	// // 文本框有值
+	// if (keyWords.value) {
+	// 	let result = await reqGetTeacherByName(keyWords.value)
+	// 	teachersArr.value = result
+	// 	total.value = result.length
+	// }
+	// // 文本框为空，重新获取课程列表
+	// else {
+	// 	getTeachers()
+	// }
+}
 
 // 表单对象
 let newTeacher = reactive({
