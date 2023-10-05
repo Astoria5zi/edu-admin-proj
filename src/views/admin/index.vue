@@ -60,12 +60,11 @@ import adminmenu from './components/AdminMenu/index.vue'
 
 		.el-main {
 			padding: 0 10px;
+
 			.el-card {
 				height: calc(100vh - $base-tabbar-height);
 				width: 100%;
 				background-color: rgb(250, 250, 250);
-				background-color: #bcf;
-
 			}
 		}
 

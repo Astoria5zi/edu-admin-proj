@@ -2,8 +2,7 @@
 	<!-- 展示教师列表以及操作 -->
 	<div v-if="!isAdd" class="teacher-table">
 		<!-- 搜索框 -->
-		<el-input placeholder="输入课程名称" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords"
-			 />
+		<el-input placeholder="输入课程名称" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" />
 
 		<!-- 添加课程按钮 -->
 		<el-button type="primary" size="default" @click="isAdd = true" style="margin: 10px;">添加课程</el-button>
@@ -23,9 +22,8 @@
 				<template #="{ row }">
 					<el-button type="primary" size="small" @click="" icon="Plus" title="添加SKU"></el-button>
 					<el-button type="primary" size="small" @click="" icon="Edit" title="修改SPU"></el-button>
-					<el-button type="primary" size="small" @click="" icon="Search" title="查看SKU"></el-button>
-					<el-button type="danger" size="small" @click="removeCourse(row.id)" icon="Delete"
-						title="删除SPU"></el-button>
+					<el-button type="primary" size="small" @click="searchCourse(row.id)" icon="Search" title="查看课程"></el-button>
+					<el-button type="danger" size="small" @click="removeCourse(row.id)" icon="Delete" title="删除SPU"></el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -33,8 +31,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
-				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
+				@current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -71,13 +69,54 @@
 		</el-form>
 
 	</div>
+
+	<!-- 课程详细界面卡片 -->
+	<div class="courseinfo" v-if="courseInfoFlag" @click="courseInfoFlag = false">
+		<el-card shadow="always" :body-style="{ padding: '20px' }" @click.stop="courseInfoFlag = true">
+			<template #header>
+				<div class="card-header">
+					<span>课程详情</span>
+				</div>
+			</template>
+			<el-form :model="courseInfo" ref="form" label-width="100px" :inline="false" style="max-width: 460px"
+				label-position="left">
+				<el-form-item label="课程名称：">
+					<el-input v-model="courseInfo.name"></el-input>
+				</el-form-item>
+				<el-form-item label="课程分类：">
+					<el-input v-model="courseInfo.stName"></el-input>
+				</el-form-item>
+				<el-form-item label="课程价格：">
+					<el-input v-model="courseInfo.stName"></el-input>
+				</el-form-item>
+				<el-form-item label="课程有效期：">
+					<el-input v-model="courseInfo.validDays"></el-input>
+				</el-form-item>
+				<el-form-item label="咨询电话：">
+					<el-input v-model="courseInfo.phone"></el-input>
+				</el-form-item>
+				<el-form-item label="课程封面：" class="demo-image__error">
+					<div class="block">
+						<el-image :src="courseInfo.pic">
+							<template #error>
+								<div class="image-slot">
+									<el-icon><icon-picture /></el-icon>
+								</div>
+							</template>
+						</el-image>
+					</div>
+				</el-form-item>
+			</el-form>
+		</el-card>
+
+	</div>
 </template>
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
 import { computed, onMounted, reactive, ref, watch } from 'vue';
-
+import { Picture as IconPicture } from '@element-plus/icons-vue'
 // 获取课程相关接口
-import { reqCourseList } from '@/api/course';
+import { reqCourseList, reqGetCourseById } from '@/api/course';
 
 
 // 当前页码
@@ -98,6 +137,23 @@ const computedCoursesArr = computed(() => {
 		return item.name.includes(keyWords.value)
 	})
 })
+// 查询课程详细信息的标志
+let courseInfoFlag = ref(false)
+// 存储课程详细信息
+let courseInfo = reactive({
+	"name": "",
+	"charge": "",
+	"price": '',
+	"originalPrice": '',
+	"qq": "",
+	"wechat": "",
+	"phone": "",
+	"validDays": '',
+	"mtName": "",
+	"stName": "",
+	"pic": ""
+})
+
 
 // 封装获取课程方法
 const getCourses = async () => {
@@ -105,10 +161,8 @@ const getCourses = async () => {
 		"auditStatus": "",
 		"courseName": ""
 	})
-
 	coursesArr.value = result.items
 	total.value = result.counts
-
 }
 
 // 组件挂载时获取教师信息
@@ -118,8 +172,8 @@ onMounted(() => {
 
 // 搜索框关键字发生变化
 watch(computedCoursesArr, () => {
-	console.log(computedCoursesArr.value);
-	
+	// console.log(computedCoursesArr.value);
+
 })
 
 // 删除按钮回调
@@ -138,10 +192,18 @@ const handleSizeChange = () => {
 	getCourses()
 }
 
+// 查看课程按详细信息按钮回调
+const searchCourse = async (id: number) => {
+	let result = await reqGetCourseById(id)
+	courseInfo = result
+	// 等数据获取完毕后再开启遮罩层
+	courseInfoFlag.value = true
+}
 
 
 
-/******** 新增教师相关方法 *********/
+
+/******** 新增课程相关方法 *********/
 
 // 表单对象
 let newTeacher = reactive({
@@ -170,11 +232,63 @@ const onSubmit = async () => {
 
 
 <style scoped lang="scss">
+.courseinfo {
+	position: absolute;
+	left: 50%; //起始是在body中，横向距左50%的位置
+	top: 50%; //起始是在body中，纵向距上50%的位置，这个点相当于body的中心点，div的左上角的定位
+	transform: translate(-50%, -50%); //水平、垂直都居中,也可以写成下面的方式
+	width: 100%;
+	background-color: rgba($color: #000000, $alpha: 0.3);
+	height: 100%;
+	z-index: 9;
+
+	.el-card {
+		position: relative;
+		left: 50%; //起始是在body中，横向距左50%的位置
+		top: 50%; //起始是在body中，纵向距上50%的位置，这个点相当于body的中心点，div的左上角的定位
+		transform: translate(-50%, -50%); //水平、垂直都居中,也可以写成下面的方式
+		width: 60%;
+		height: 60%;
+	}
+}
+
 .avatar-uploader .avatar {
 	width: 178px;
 	height: 178px;
 	display: block;
 	// background-color: #bcf;
+}
+
+
+.demo-image__error .demonstration {
+	display: block;
+	color: var(--el-text-color-secondary);
+	font-size: 14px;
+	margin-bottom: 20px;
+}
+
+.demo-image__error .el-image {
+	padding: 0 5px;
+	max-width: 300px;
+	max-height: 200px;
+	min-width: 200px;
+	width: 100%;
+	height: 200px;
+}
+
+.demo-image__error .image-slot {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	background: var(--el-fill-color-light);
+	color: var(--el-text-color-secondary);
+	font-size: 30px;
+}
+
+.demo-image__error .image-slot .el-icon {
+	font-size: 30px;
 }
 </style>
 

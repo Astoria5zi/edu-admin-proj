@@ -14,7 +14,6 @@ enum API {
     EDITTEACHER = "/teacher/update",
     // 根据name获取教师信息
     GETTEARCHERBYNAME = "/teacher/find/"
-
 }
 
 // 获取所有教师信息请求
