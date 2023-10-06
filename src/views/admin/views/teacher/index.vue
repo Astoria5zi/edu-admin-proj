@@ -17,14 +17,14 @@
 			<el-table-column prop="resume" label="职称" width="80" />
 			<el-table-column prop="pic" label="证件照" />
 
-			<el-table-column label="操作" width="250">
+			<el-table-column label="操作" width="200">
 				<template #="{ row }">
-					<el-button type="primary" size="small" @click="" icon="Plus" title="添加SKU"></el-button>
 					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit"
 						title="修改教师"></el-button>
-					<el-button type="primary" size="small" @click="" icon="Search" title="查看SKU"></el-button>
+					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search"
+						title="查看教师详情"></el-button>
 					<el-button type="danger" size="small" @click="removeTeacher(row.id)" icon="Delete"
-						title="删除SPU"></el-button>
+						title="删除教师"></el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -82,13 +82,51 @@
 		</el-form>
 
 	</div>
+
+	<!-- 教师详细界面卡片 -->
+	<div class="teacherinfo" v-if="teacherInfoFlag" @click="teacherInfoFlag = false">
+		<el-card shadow="always" :body-style="{ padding: '20px' }" @click.stop="teacherInfoFlag = true">
+			<template #header>
+				<div class="card-header">
+					<span>教师详情</span>
+				</div>
+			</template>
+			<el-form :model="teacherInfo" ref="form" label-width="100px" :inline="false" style="max-width: 460px"
+				label-position="left">
+				<el-form-item label="教师名称：">
+					<el-input v-model="teacherInfo.name"></el-input>
+				</el-form-item>
+				<el-form-item label="教师编号：">
+					<el-input v-model="teacherInfo.id"></el-input>
+				</el-form-item>
+				<el-form-item label="教师简介：">
+					<el-input v-model="teacherInfo.intro"></el-input>
+				</el-form-item>
+				<el-form-item label="教师职称：">
+					<el-input v-model="teacherInfo.resume"></el-input>
+				</el-form-item>
+				<el-form-item label="教师照片：" class="demo-image__error">
+					<div class="block">
+						<el-image :src="teacherInfo.pic">
+							<template #error>
+								<div class="image-slot">
+									<el-icon><icon-picture /></el-icon>
+								</div>
+							</template>
+						</el-image>
+					</div>
+				</el-form-item>
+			</el-form>
+		</el-card>
+
+	</div>
 </template>
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
 import { computed, onMounted, reactive, ref } from 'vue';
 // 获取教师相关接口
 import { reqGetTeacherList, reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
-
+import { Picture as IconPicture } from '@element-plus/icons-vue'
 
 // 当前页码
 let pageNo = ref(1)
@@ -102,6 +140,27 @@ let isAdd = ref(false)
 let teachersArr = ref([])
 // 搜索框关键字
 let keyWords = ref('')
+// 查询教师详细信息的标志
+let teacherInfoFlag = ref(false)
+// 表单对象
+let newTeacher = reactive({
+	utype: '101002', // 教师类型  必要
+	name: '',  // 必要
+	username: '',// 必要
+	sex: '',// 必要
+	intro: '',
+	resume: '',
+	userpic: '',
+
+})
+// 教师详细信息
+let teacherInfo = reactive({
+	"id": '',
+	"name": "",
+	"intro": '',
+	"resume": '',
+	"pic": ''
+})
 // 计算属性教师列表
 const computedTeachersArr = computed(() => {
 	return teachersArr.value.filter((item: any) => {
@@ -189,18 +248,6 @@ const textChange = async () => {
 	// }
 }
 
-// 表单对象
-let newTeacher = reactive({
-	utype: '101002', // 教师类型  必要
-	name: '',  // 必要
-	username: '',// 必要
-	sex: '',// 必要
-	intro: '',
-	resume: '',
-	userpic: '',
-
-})
-
 // 确认添加按钮回调
 const onSubmit = async () => {
 	// 返回教师列表
@@ -212,6 +259,14 @@ const onSubmit = async () => {
 	getTeachers()
 }
 
+// 查询教师详情回调
+const searchTeacher = async (id: number) => {
+
+	let result = await reqGetTeacherByID(id)
+	teacherInfo = result
+	teacherInfoFlag.value = true
+}
+
 
 
 
@@ -219,11 +274,62 @@ const onSubmit = async () => {
 
 
 <style scoped lang="scss">
+.teacherinfo {
+	position: absolute;
+	left: 50%; //起始是在body中，横向距左50%的位置
+	top: 50%; //起始是在body中，纵向距上50%的位置，这个点相当于body的中心点，div的左上角的定位
+	transform: translate(-50%, -50%); //水平、垂直都居中,也可以写成下面的方式
+	width: 100%;
+	background-color: rgba($color: #000000, $alpha: 0.3);
+	height: 100%;
+	z-index: 9;
+
+	.el-card {
+		position: relative;
+		left: 50%; //起始是在body中，横向距左50%的位置
+		top: 50%; //起始是在body中，纵向距上50%的位置，这个点相当于body的中心点，div的左上角的定位
+		transform: translate(-50%, -50%); //水平、垂直都居中,也可以写成下面的方式
+		width: 60%;
+		height: 60%;
+	}
+}
+
 .avatar-uploader .avatar {
 	width: 178px;
 	height: 178px;
 	display: block;
 	// background-color: #bcf;
+}
+
+.demo-image__error .demonstration {
+	display: block;
+	color: var(--el-text-color-secondary);
+	font-size: 14px;
+	margin-bottom: 20px;
+}
+
+.demo-image__error .el-image {
+	padding: 0 5px;
+	max-width: 300px;
+	max-height: 200px;
+	min-width: 200px;
+	width: 100%;
+	height: 200px;
+}
+
+.demo-image__error .image-slot {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	background: var(--el-fill-color-light);
+	color: var(--el-text-color-secondary);
+	font-size: 30px;
+}
+
+.demo-image__error .image-slot .el-icon {
+	font-size: 30px;
 }
 </style>
 
