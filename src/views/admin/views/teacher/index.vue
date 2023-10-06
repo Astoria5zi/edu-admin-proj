@@ -2,8 +2,7 @@
 	<!-- 展示教师列表以及操作 -->
 	<div v-if="!isAdd" class="teacher-table">
 		<!-- 搜索框 -->
-		<el-input @change="textChange" placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;"
-			v-model="keyWords" />
+		<el-input @change="textChange" placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" />
 
 		<!-- 添加教师按钮 -->
 		<el-button type="primary" size="default" @click="isAdd = true" style="margin: 10px;">添加教师</el-button>
@@ -19,12 +18,9 @@
 
 			<el-table-column label="操作" width="200">
 				<template #="{ row }">
-					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit"
-						title="修改教师"></el-button>
-					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search"
-						title="查看教师详情"></el-button>
-					<el-button type="danger" size="small" @click="removeTeacher(row.id)" icon="Delete"
-						title="删除教师"></el-button>
+					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit" title="修改教师"></el-button>
+					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search" title="查看教师详情"></el-button>
+					<el-button type="danger" size="small" @click="removeTeacher(row.id)" icon="Delete" title="删除教师"></el-button>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -32,8 +28,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
-				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
+				@current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -48,9 +44,8 @@
 
 			<el-form-item label="教师职称：">
 				<el-select placeholder="please select your level" v-model="newTeacher.resume">
-					<el-option label="讲师" value="讲师" />
-					<el-option label="副教授" value="副教授" />
-					<el-option label="教授" value="教授" />
+					<el-option v-for="item in resumeOption" :key="item.value" :label="item.lable" :value="item.value">
+					</el-option>
 				</el-select>
 			</el-form-item>
 
@@ -66,8 +61,8 @@
 			</el-form-item>
 			<el-form-item label="教师照片：">
 				<el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-					:show-file-list="false">
-					<img v-if="false" class="avatar" />
+					:show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+					<img v-if="newTeacher.userpic" class="avatar" :src="newTeacher.userpic" />
 					<el-icon v-else class="avatar-uploader-icon">
 						<Plus />
 					</el-icon>
@@ -76,7 +71,7 @@
 			<el-form-item>
 				<el-button v-if="editFlag" type="primary" @click="onEdit">修改</el-button>
 				<el-button v-else type="primary" @click="onSubmit">新增</el-button>
-				<el-button @click="isAdd = false">取消</el-button>
+				<el-button @click="cancel">取消</el-button>
 			</el-form-item>
 
 		</el-form>
@@ -127,6 +122,8 @@ import { computed, onMounted, reactive, ref } from 'vue';
 // 获取教师相关接口
 import { reqGetTeacherList, reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
+import type { UploadProps } from 'element-plus'
+import { ElMessage } from 'element-plus'
 
 // 当前页码
 let pageNo = ref(1)
@@ -143,7 +140,7 @@ let keyWords = ref('')
 // 查询教师详细信息的标志
 let teacherInfoFlag = ref(false)
 // 表单对象
-let newTeacher = reactive({
+let newTeacher = ref({
 	utype: '101002', // 教师类型  必要
 	name: '',  // 必要
 	username: '',// 必要
@@ -153,6 +150,12 @@ let newTeacher = reactive({
 	userpic: '',
 
 })
+// 教师职称配置对象（不这样做会出现修改教师职称时，lable不能改变的bug）
+const resumeOption = [
+	{ value: '讲师', lable: '讲师' },
+	{ value: '副教授', lable: '副教授' },
+	{ value: '教授', lable: '教授' }
+]
 // 教师详细信息
 let teacherInfo = reactive({
 	"id": '',
@@ -174,12 +177,24 @@ let editFlag = ref(false)
 // 封装获取教师信息方法
 const getTeachers = async () => {
 	let result = await reqGetTeacherList(pageNo.value, pageSize.value)
-	console.log(result);
+
 
 	teachersArr.value = result.items
 	total.value = result.counts
 }
+// 封装一个清空对象属性值方法
+const clearObj = () => {
+	newTeacher.value = {
+		utype: '101002', // 教师类型  必要
+		name: '',  // 必要
+		username: '',// 必要
+		sex: '',// 必要
+		intro: '',
+		resume: '',
+		userpic: '',
 
+	}
+}
 // 组件挂载时获取教师信息
 onMounted(() => {
 	getTeachers()
@@ -215,17 +230,23 @@ const editTeacher = async (id: number) => {
 	// 跳转到表单页面
 	isAdd.value = true
 	// 教师信息添加到表单
-	Object.assign(newTeacher, result)
-	newTeacher.username = newTeacher.name
-	console.log(newTeacher);
+	Object.assign(newTeacher.value, result)
+	newTeacher.value.username = newTeacher.value.name
 }
 
 // 确认修改按钮回调
 const onEdit = async () => {
 	// 真不是我想这样写，接口那里一个名字有name和username两个字段，人都被搞混了，反正现在这样能正常用
-	newTeacher.name = newTeacher.username
+	newTeacher.value.name = newTeacher.value.username
 	// 发起修改请求
-	await reqEditTeacher(newTeacher)
+	let result = await reqEditTeacher(newTeacher.value)
+	if (result.code == 1) {
+		ElMessage.success("添加成功")
+	} else {
+		ElMessage.error("添加失败")
+	}
+	// 清空教师对象
+	clearObj()
 	// 修改成功重新获取教师信息
 	getTeachers()
 	// 关闭修改标志
@@ -250,23 +271,55 @@ const textChange = async () => {
 
 // 确认添加按钮回调
 const onSubmit = async () => {
+	newTeacher.value.name = newTeacher.value.username
 	// 返回教师列表
 	isAdd.value = false
-	newTeacher.name = newTeacher.username
 	// 发起添加教师请求
-	await reqAddTeacher(newTeacher)
+	let result = await reqAddTeacher(newTeacher.value)
+	if (result.code == 1) {
+		ElMessage.success("添加成功")
+	} else {
+		ElMessage.error("添加失败")
+	}
+	// 清空教师对象
+	clearObj()
 	// 重新获取教师列表
 	getTeachers()
+}
+
+// 上传教师图片两个钩子
+const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
+	if (response == 'OK') {
+		ElMessage.success("上传成功")
+		newTeacher.value.userpic = URL.createObjectURL(uploadFile.raw!)
+	}
+
+}
+const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
+	if (rawFile.type !== 'image/jpeg') {
+		ElMessage.error('必须上传图片格式!')
+		return false
+	} else if (rawFile.size / 1024 / 1024 > 2) {
+		ElMessage.error('图片大小不能超过2MB!')
+		return false
+	}
+	return true
 }
 
 // 查询教师详情回调
 const searchTeacher = async (id: number) => {
 
 	let result = await reqGetTeacherByID(id)
+
 	teacherInfo = result
 	teacherInfoFlag.value = true
 }
 
+// 取消按钮回调
+const cancel = () => {
+	isAdd.value = false
+	clearObj()
+}
 
 
 
