@@ -64,7 +64,7 @@
 
 			<el-form-item>
 				<el-button type="primary" @click="onSubmit">添加教师</el-button>
-				<el-button>取消</el-button>
+				<el-button @click="isAdd=false">取消</el-button>
 			</el-form-item>
 		</el-form>
 
@@ -110,6 +110,7 @@
 		</el-card>
 
 	</div>
+	
 </template>
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
@@ -199,12 +200,6 @@ const searchCourse = async (id: number) => {
 	// 等数据获取完毕后再开启遮罩层
 	courseInfoFlag.value = true
 }
-
-
-
-
-/******** 新增课程相关方法 *********/
-
 // 表单对象
 let newTeacher = reactive({
 	name: '',
