@@ -11,7 +11,7 @@
 		<el-table :data="teachersArr" border style="width: 100%">
 			<el-table-column label="序号" type="index" algin="center" width="80"></el-table-column>
 			<el-table-column prop="id" label="编号" width="80" />
-			<el-table-column prop="name" label="姓名" width="80" />
+			<el-table-column prop="name" label="姓名" width="100" />
 			<el-table-column prop="intro" label="个人简介" />
 			<el-table-column prop="resume" label="职称" width="80" />
 			<el-table-column prop="pic" label="证件照" />
@@ -20,7 +20,11 @@
 				<template #="{ row }">
 					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit" title="修改教师"></el-button>
 					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search" title="查看教师详情"></el-button>
-					<el-button type="danger" size="small" @click="removeTeacher(row.id)" icon="Delete" title="删除教师"></el-button>
+					<el-popconfirm title="确认删除吗?" @confirm="removeTeacher(row.id)">
+						<template #reference>
+							<el-button type="danger" size="small" icon="Delete" title="删除教师"></el-button>
+						</template>
+					</el-popconfirm>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -204,7 +208,10 @@ onMounted(() => {
 // 删除按钮回调
 const removeTeacher = async (id: number) => {
 	// 调用删除接口
-	await reqDeleteTeacher(id)
+	let result = await reqDeleteTeacher(id)
+	if(result.code == 1){
+		ElMessage.success("删除成功")
+	}
 	// 重新获取教师信息
 	await getTeachers()
 }
@@ -241,7 +248,7 @@ const onEdit = async () => {
 	// 发起修改请求
 	let result = await reqEditTeacher(newTeacher.value)
 	if (result.code == 1) {
-		ElMessage.success("添加成功")
+		ElMessage.success("修改成功")
 	} else {
 		ElMessage.error("添加失败")
 	}
@@ -295,6 +302,7 @@ const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => 
 	}
 
 }
+
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
 	if (rawFile.type !== 'image/jpeg') {
 		ElMessage.error('必须上传图片格式!')
