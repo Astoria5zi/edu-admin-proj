@@ -37,8 +37,6 @@
 		</div>
 	</div>
 
-
-
 	<!-- 添加教师界面 -->
 	<div v-if="isAdd" class="add-container">
 		<el-form :model="newTeacher" ref="form" label-width="120px" :inline="false" style="max-width: 460px">
@@ -63,15 +61,20 @@
 			<el-form-item label="教师简介：">
 				<el-input type="textarea" v-model="newTeacher.intro" />
 			</el-form-item>
+
+
 			<el-form-item label="教师照片：">
-				<el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-					:show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-					<img v-if="newTeacher.userpic" class="avatar" :src="newTeacher.userpic" />
+				<el-upload class="avatar-uploader" :http-request="uploadPic" :show-file-list="false"
+					:on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
+					<img v-if="newTeacher.pic" class="avatar" :src="newTeacher.pic" />
 					<el-icon v-else class="avatar-uploader-icon">
 						<Plus />
 					</el-icon>
 				</el-upload>
 			</el-form-item>
+
+
+
 			<el-form-item>
 				<el-button v-if="editFlag" type="primary" @click="onEdit">修改</el-button>
 				<el-button v-else type="primary" @click="onSubmit">新增</el-button>
@@ -125,6 +128,8 @@ import { Search } from '@element-plus/icons-vue'
 import { computed, onMounted, reactive, ref } from 'vue';
 // 获取教师相关接口
 import { reqGetTeacherList, reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
+// 获取上传文件接口
+import { reqUploadFile } from '@/api/common'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import type { UploadProps } from 'element-plus'
 import { ElMessage } from 'element-plus'
@@ -151,7 +156,7 @@ let newTeacher = ref({
 	sex: '',// 必要
 	intro: '',
 	resume: '',
-	userpic: '',
+	pic: '',
 
 })
 // 教师职称配置对象（不这样做会出现修改教师职称时，lable不能改变的bug）
@@ -161,7 +166,7 @@ const resumeOption = [
 	{ value: '教授', lable: '教授' }
 ]
 // 教师详细信息
-let teacherInfo = reactive({
+let teacherInfo = ref({
 	"id": '',
 	"name": "",
 	"intro": '',
@@ -195,7 +200,7 @@ const clearObj = () => {
 		sex: '',// 必要
 		intro: '',
 		resume: '',
-		userpic: '',
+		pic: '',
 
 	}
 }
@@ -209,7 +214,7 @@ onMounted(() => {
 const removeTeacher = async (id: number) => {
 	// 调用删除接口
 	let result = await reqDeleteTeacher(id)
-	if(result.code == 1){
+	if (result.code == 1) {
 		ElMessage.success("删除成功")
 	}
 	// 重新获取教师信息
@@ -234,6 +239,7 @@ const editTeacher = async (id: number) => {
 	editFlag.value = true
 	// 获取该id对应教师信息
 	let result = await reqGetTeacherByID(id)
+
 	// 跳转到表单页面
 	isAdd.value = true
 	// 教师信息添加到表单
@@ -247,6 +253,7 @@ const onEdit = async () => {
 	newTeacher.value.name = newTeacher.value.username
 	// 发起修改请求
 	let result = await reqEditTeacher(newTeacher.value)
+
 	if (result.code == 1) {
 		ElMessage.success("修改成功")
 	} else {
@@ -296,11 +303,9 @@ const onSubmit = async () => {
 
 // 上传教师图片两个钩子
 const handleAvatarSuccess: UploadProps['onSuccess'] = (response, uploadFile) => {
-	if (response == 'OK') {
+	if (response == '1') {
 		ElMessage.success("上传成功")
-		newTeacher.value.userpic = URL.createObjectURL(uploadFile.raw!)
 	}
-
 }
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
@@ -314,12 +319,27 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
 	return true
 }
 
+// 自定义upload的事件覆盖el-upload的action
+const uploadPic = async (param: any) => {
+
+	// 创建FormData对象，用于将文件对象包装成表单数据
+	const formData = new FormData()
+	formData.append('file', param.file)
+	let result = await reqUploadFile(formData)
+
+	// 调用onSuccess钩子，传入响应式数据
+	param.onSuccess(result.code, param.file)
+
+	// 上传后从远程服务器要文件地址进行赋值
+	newTeacher.value.pic = result.data
+
+}
+
 // 查询教师详情回调
 const searchTeacher = async (id: number) => {
-
 	let result = await reqGetTeacherByID(id)
-
-	teacherInfo = result
+	console.log(result);
+	teacherInfo.value = result
 	teacherInfoFlag.value = true
 }
 

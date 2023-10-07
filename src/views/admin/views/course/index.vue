@@ -18,12 +18,15 @@
 			<el-table-column prop="status" label="课程状态" width="100" />
 			<el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip />
 
-			<el-table-column label="操作" width="230">
+			<el-table-column label="操作" width="200">
 				<template #="{ row }">
-					<el-button type="primary" size="small" @click="" icon="Plus" title="添加SKU"></el-button>
-					<el-button type="primary" size="small" @click="" icon="Edit" title="修改SPU"></el-button>
-					<el-button type="primary" size="small" @click="searchCourse(row.id)" icon="Search" title="查看课程"></el-button>
-					<el-button type="danger" size="small" @click="removeCourse(row.id)" icon="Delete" title="删除SPU"></el-button>
+					<el-button type="primary" size="small" @click="" icon="Edit" title="修改课程信息"></el-button>
+					<el-button type="primary" size="small" @click="searchCourse(row.id)" icon="Search" title="查看课程信息"></el-button>
+					<el-popconfirm title="确认删除吗?" @confirm="removeCourse(row.id)">
+						<template #reference>
+							<el-button type="danger" size="small" icon="Delete" title="删除课程"></el-button>
+						</template>
+					</el-popconfirm>
 				</template>
 			</el-table-column>
 		</el-table>
@@ -61,10 +64,9 @@
 					</el-icon>
 				</el-upload>
 			</el-form-item>
-
 			<el-form-item>
 				<el-button type="primary" @click="onSubmit">添加教师</el-button>
-				<el-button @click="isAdd=false">取消</el-button>
+				<el-button @click="isAdd = false">取消</el-button>
 			</el-form-item>
 		</el-form>
 
@@ -110,7 +112,6 @@
 		</el-card>
 
 	</div>
-	
 </template>
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
@@ -154,7 +155,8 @@ let courseInfo = reactive({
 	"stName": "",
 	"pic": ""
 })
-
+// 新增课程表单对象
+let newCourse = ref({})
 
 // 封装获取课程方法
 const getCourses = async () => {
@@ -200,14 +202,6 @@ const searchCourse = async (id: number) => {
 	// 等数据获取完毕后再开启遮罩层
 	courseInfoFlag.value = true
 }
-// 表单对象
-let newTeacher = reactive({
-	name: '',
-	intro: '',
-	resume: '',
-	pic: '',
-	utype: '101002' // 教师类型
-})
 
 // 确认添加按钮回调
 const onSubmit = async () => {
