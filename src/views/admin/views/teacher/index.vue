@@ -8,13 +8,17 @@
 		<el-button type="primary" size="default" @click="isAdd = true" style="margin: 10px;">添加教师</el-button>
 
 		<!-- 展示教师列表 -->
-		<el-table :data="teachersArr" border style="width: 100%">
+		<el-table :data="teachersArr" border style="width: 100%" max-height="75vh ">
 			<el-table-column label="序号" type="index" algin="center" width="80"></el-table-column>
 			<el-table-column prop="id" label="编号" width="80" />
 			<el-table-column prop="name" label="姓名" width="100" />
 			<el-table-column prop="intro" label="个人简介" />
 			<el-table-column prop="resume" label="职称" width="80" />
-			<el-table-column prop="pic" label="证件照" />
+			<el-table-column prop="pic" label="证件照">
+				<template #="{ row }">
+					<img class="table-avatar" :src="row.userpic" alt="">
+				</template>
+			</el-table-column>
 
 			<el-table-column label="操作" width="200">
 				<template #="{ row }">
@@ -109,7 +113,7 @@
 				</el-form-item>
 				<el-form-item label="教师照片：" class="demo-image__error">
 					<div class="block">
-						<el-image :src="teacherInfo.pic">
+						<el-image :src="teacherInfo.userpic">
 							<template #error>
 								<div class="image-slot">
 									<el-icon><icon-picture /></el-icon>
@@ -123,6 +127,7 @@
 
 	</div>
 </template>
+
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -157,6 +162,7 @@ let newTeacher = ref({
 	intro: '',
 	resume: '',
 	pic: '',
+	userpic: ''
 
 })
 // 教师职称配置对象（不这样做会出现修改教师职称时，lable不能改变的bug）
@@ -171,7 +177,7 @@ let teacherInfo = ref({
 	"name": "",
 	"intro": '',
 	"resume": '',
-	"pic": ''
+	"userpic": ''
 })
 // 计算属性教师列表
 const computedTeachersArr = computed(() => {
@@ -201,6 +207,7 @@ const clearObj = () => {
 		intro: '',
 		resume: '',
 		pic: '',
+		userpic: ''
 
 	}
 }
@@ -285,9 +292,11 @@ const textChange = async () => {
 
 // 确认添加按钮回调
 const onSubmit = async () => {
+
+	// 为啥后端接口里同一个意思要整两个字段啊aaaaaaa
 	newTeacher.value.name = newTeacher.value.username
-	// 返回教师列表
-	isAdd.value = false
+	newTeacher.value.userpic = newTeacher.value.pic	
+
 	// 发起添加教师请求
 	let result = await reqAddTeacher(newTeacher.value)
 	if (result.code == 1) {
@@ -299,6 +308,8 @@ const onSubmit = async () => {
 	clearObj()
 	// 重新获取教师列表
 	getTeachers()
+	// 返回教师列表
+	isAdd.value = false
 }
 
 // 上传教师图片两个钩子
@@ -331,6 +342,7 @@ const uploadPic = async (param: any) => {
 	param.onSuccess(result.code, param.file)
 
 	// 上传后从远程服务器要文件地址进行赋值
+	newTeacher.value.userpic = result.data
 	newTeacher.value.pic = result.data
 
 }
@@ -355,6 +367,12 @@ const cancel = () => {
 
 
 <style scoped lang="scss">
+.table-avatar {
+	height: 60px;
+	width: 60px;
+}
+
+
 .teacherinfo {
 	position: absolute;
 	left: 50%; //起始是在body中，横向距左50%的位置
