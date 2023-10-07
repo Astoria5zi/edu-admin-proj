@@ -1,7 +1,7 @@
 <template>
 	<!-- 左侧菜单组件 -->
 	<el-menu router active-text-color="#ffd04b" background-color="$base-menu-background" class="el-menu-vertical-demo"
-		default-active="/admin/home" text-color="#fff">
+		:default-active="$route.path" text-color="#fff">
 		<!-- 首页 -->
 		<el-menu-item index="/admin/home">
 			<el-icon>
@@ -37,7 +37,9 @@
 </template>
     
 <script setup lang='ts'>
-console.log();
+import { useRoute } from 'vue-router';
+let $route = useRoute()
+
 
 </script>
     
