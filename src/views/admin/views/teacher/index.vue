@@ -389,7 +389,7 @@ const cancel = () => {
 		top: 50%; //起始是在body中，纵向距上50%的位置，这个点相当于body的中心点，div的左上角的定位
 		transform: translate(-50%, -50%); //水平、垂直都居中,也可以写成下面的方式
 		width: 60%;
-		height: 60%;
+		height: 70%;
 	}
 }
 
