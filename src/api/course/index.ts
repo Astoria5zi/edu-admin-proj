@@ -1,8 +1,9 @@
 // 统一管理课程相关的接口
 import request from "@/utils/request"
+// 引入接口类型
+import { AddcourseResponse } from './type'
 // 课程用户相关的请求地址
 enum API {
-    // LOGIN_URL = 'http://114.115.179.162:8022/prod-api/admin/acl/index/login',
 
     // 获取分页课程列表接口
     COURSELIST_URL = "/course/list?",
@@ -10,7 +11,11 @@ enum API {
     GETCOURSEBYID_URL = '/course/',
     // 查询树状课程接口
     TREENODECOURSE_URL = '/course-category/tree-nodes/',
-    
+    // 根据小分类节点查询课程信息(st:small treenodes?)
+    GETCOURSEBYST_URL = '/course-category/st/',
+    // 新增课程接口
+    ADDNEWCOURSE_URL = '/course/add'
+
 }
 
 // 获取所有课程信息接口
@@ -24,3 +29,9 @@ export const reqGetTreeNodeCourse = () => request.get<any, any>(API.TREENODECOUR
 
 // 根据分类id查询对应课程信息方法
 export const reqGetTreeNodeCourseById = (id: number) => request.get<any, any>(API.TREENODECOURSE_URL + `${id}`)
+
+// 根据小分类节点查询课程信息方法
+export const reqGetCourseBySt = (nodeId: string) => request.get<any, any>(API.GETCOURSEBYST_URL + `${nodeId}`)
+
+// 新增课程方法
+export const reqAddNewCourse = (addCourseDto: any) => request.post<any, AddcourseResponse>(API.ADDNEWCOURSE_URL, addCourseDto)

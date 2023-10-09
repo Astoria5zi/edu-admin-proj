@@ -13,7 +13,7 @@
     </el-cascader>
 
     <!-- 添加课程按钮 -->
-    <el-button type="primary" size="default" @click="isAdd = true" style="margin: 10px">添加课程</el-button>
+    <el-button type="primary" size="default" @click="btnAddCourse" style="margin: 10px">添加课程</el-button>
 
     <!-- 展示课程列表 -->
     <el-table :data="computedCoursesArr" border style="width: 100%" max-height="650">
@@ -49,31 +49,63 @@
 
   <!-- 添加课程界面 -->
   <div v-if="isAdd" class="add-container">
-    <el-form :model="newTeacher" ref="form" label-width="120px" :inline="false" style="max-width: 460px">
-      <el-form-item label="教师姓名：">
-        <el-input v-model="newTeacher.name"></el-input>
+    <el-form :model="newCourse" ref="form" label-width="120px" :inline="false" style="max-width: 460px">
+      <el-form-item label="课程名称：">
+        <el-input v-model="newCourse.name"></el-input>
       </el-form-item>
-      <el-form-item label="教师职称：" v-model="newTeacher.resume">
-        <el-select placeholder="please select your level">
-          <el-option label="讲师" value="lecturer" />
-          <el-option label="副教授" value="associate" />
-          <el-option label="教授" value="professor" />
-        </el-select>
+      <el-form-item label="当前定价：">
+        <el-input v-model="newCourse.price"></el-input>
       </el-form-item>
-      <el-form-item label="教师简介：">
-        <el-input type="textarea" v-model="newTeacher.intro" />
+      <el-form-item label="起始价格：">
+        <el-input v-model="newCourse.originalPrice"></el-input>
       </el-form-item>
-      <el-form-item label="教师照片：">
+      <el-form-item label="课程分类：">
+        <el-cascader v-model="newCourse.st" :options="treeNodeCourseArr" @change="chooseSt" :props="cascaderProps">
+          <template #default="{ node, data }">
+            <span>{{ data.label }}</span>
+            <span v-if="!node.isLeaf"> ({{ data.childrenTreeNodes.length }}) </span>
+          </template>
+        </el-cascader>
+      </el-form-item>
+
+      <el-form-item label="有效日期：">
+        <el-input v-model="newCourse.validDays" />
+      </el-form-item>
+      <el-form-item label="适用人群：">
+        <el-input v-model="newCourse.users" />
+      </el-form-item>
+      <el-form-item label="课程标签：">
+        <el-input v-model="newCourse.tags" />
+      </el-form-item>
+      <el-form-item label="授课模式：">
+        <el-input v-model="newCourse.teachmode" />
+      </el-form-item>
+      <el-form-item label="课程QQ：">
+        <el-input v-model="newCourse.qq" />
+      </el-form-item>
+      <el-form-item label="课程微信：">
+        <el-input v-model="newCourse.wechat" />
+      </el-form-item>
+      <el-form-item label="课程手机：">
+        <el-input v-model="newCourse.phone" />
+      </el-form-item>
+      <el-form-item label="课程等级：">
+        <el-input v-model="newCourse.grade" />
+      </el-form-item>
+      <el-form-item label="课程描述：">
+        <el-input type="textarea" v-model="newCourse.description" />
+      </el-form-item>
+      <el-form-item label="课程照片：">
         <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
           :show-file-list="false">
-          <img v-if="false" class="avatar" />
+          <img v-if="false" class="avatar" :src="newCourse.pic" />
           <el-icon v-else class="avatar-uploader-icon">
             <Plus />
           </el-icon>
         </el-upload>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">添加教师</el-button>
+        <el-button type="primary" @click="onSubmit">添加课程</el-button>
         <el-button @click="isAdd = false">取消</el-button>
       </el-form-item>
     </el-form>
@@ -125,7 +157,17 @@ import { Search } from "@element-plus/icons-vue";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { Picture as IconPicture } from "@element-plus/icons-vue";
 // 获取课程相关接口
-import { reqCourseList, reqGetCourseById, reqGetTreeNodeCourse, reqGetTreeNodeCourseById } from "@/api/course";
+import {
+  reqCourseList,
+  reqGetCourseById,
+  reqGetTreeNodeCourse,
+  reqGetTreeNodeCourseById,
+  reqGetCourseBySt,
+  reqAddNewCourse
+} from "@/api/course";
+// 引入课程接口类型
+// 引入接口类型
+import { AddcourseResponse } from '@/api/course/type'
 
 // 当前页码
 let pageNo = ref(1);
@@ -133,10 +175,10 @@ let pageNo = ref(1);
 let pageSize = ref(5);
 // 教师总数量
 let total = ref(0);
-// 是否点击添加教师
+// 是否点击添加课程
 let isAdd = ref(false);
 // 存储课程列表
-let coursesArr = ref([]);
+let coursesArr = ref<AddcourseResponse[]>([]);
 // 搜索框关键字
 let keyWords = ref("");
 // 计算属性课程列表
@@ -162,7 +204,27 @@ let courseInfo = reactive({
   pic: "",
 });
 // 新增课程表单对象
-let newCourse = ref({});
+let newCourse = ref({
+
+  "charge": "201001", // 000免费 001收费
+  "price": '1',
+  "originalPrice": '1',
+  "qq": "2431221241",
+  "wechat": "2431221241",
+  "phone": "17777777777",
+  "validDays": 365,
+  "mt": "1-1",
+  "st": "1-1-1",
+  "name": "前端课程1",
+  "pic": "无",
+  "teachmode": "200002",
+  "users": "初级人员",
+  "tags": "",
+  "grade": "204001",
+  "description": ""
+
+
+});
 // 树状课程数组
 let treeNodeCourseArr = ref([]);
 // 级联选择器绑定值
@@ -192,7 +254,6 @@ onMounted(async () => {
   // 获取所有一级分类ID
   let result = await reqGetTreeNodeCourse();
   treeNodeCourseArr.value = result;
-  console.log(result);
 });
 
 // 搜索框关键字发生变化
@@ -208,6 +269,7 @@ const removeCourse = async (id: number) => {
 
 // 当前页面改变触发回调
 const handleCurrentChange = () => {
+
   getCourses();
 };
 
@@ -224,24 +286,37 @@ const searchCourse = async (id: number) => {
   courseInfoFlag.value = true;
 };
 
+// 添加课程按钮回调
+const btnAddCourse = () => {
+  isAdd.value = true
+
+}
+
 // 确认添加按钮回调
 const onSubmit = async () => {
-  // 返回教师列表
+  // 返回课程列表
   isAdd.value = false;
-
   // 发起添加教师请求
-  let result = await reqAddTeacher(newTeacher);
-  console.log(result);
+  let result: AddcourseResponse = await reqAddNewCourse(newCourse.value);
+
+  // 请求成功以后将新课程push进数组
+  coursesArr.value.push(result)
+  // 数组大小发生变化 这样还是会触发totalchange钩子
+  // total.value = coursesArr.value.length
+  getCourses();
 };
 
 // 级联选择器绑定值变化触发回调
-const handleChange = async (value) => {
-  console.log(value);
-
-  let result = await reqGetTreeNodeCourseById(value.at(-1))
-  console.log(result);
-
+const handleChange = async (value: any) => {
+  let result = await reqGetCourseBySt(value.at(-1))
+  coursesArr.value = result
 };
+
+// 新增课程中的级联选择器变化触发回调
+const chooseSt = (value: any) => {
+  newCourse.value.st = value.at(-1)
+  newCourse.value.mt = value.at(0)
+}
 
 
 </script>
