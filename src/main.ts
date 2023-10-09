@@ -34,7 +34,7 @@ import "video.js/dist/video-js.css";
 // 引入echarts
 import echarts from '@/utils/echarts'
 app.config.globalProperties.echarts = echarts;
-
+ 
 
 
 // 安装插件

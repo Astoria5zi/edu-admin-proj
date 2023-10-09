@@ -18,7 +18,6 @@ let useUserStore = defineStore('User', {
             let result = await reqUserLogin(userLoginDTO)
             // 登陆成功
             if (result.code == 1) {
-
                 // 获取TOKEN
                 this.token = result.data.token
                 // 本地存储TOKEN

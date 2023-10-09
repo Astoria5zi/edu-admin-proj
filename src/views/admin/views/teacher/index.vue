@@ -2,28 +2,28 @@
 	<!-- 展示教师列表以及操作 -->
 	<div v-if="!isAdd" class="teacher-table">
 		<!-- 搜索框 -->
-		<el-input @change="textChange" placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" />
-
+		<el-input @change="textChange" placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;"
+			v-model="keyWords" />
 		<!-- 添加教师按钮 -->
-		<el-button type="primary" size="default" @click="isAdd = true" style="margin: 10px;">添加教师</el-button>
-
+		<el-button type="primary" size="default" @click="addTeacherBtn" style="margin: 10px;">添加教师</el-button>
 		<!-- 展示教师列表 -->
-		<el-table :data="teachersArr" border style="width: 100%" max-height="75vh ">
-			<el-table-column label="序号" type="index" algin="center" width="80"></el-table-column>
-			<el-table-column prop="id" label="编号" width="80" />
-			<el-table-column prop="name" label="姓名" width="100" />
-			<el-table-column prop="intro" label="个人简介" />
-			<el-table-column prop="resume" label="职称" width="80" />
-			<el-table-column prop="pic" label="证件照">
+		<el-table :data="computedTeachersArr" border style="width: 100%" max-height="75vh " :show-overflow-tooltip="true">
+			<el-table-column label="序号" type="index" algin="center" width="150" align="center"></el-table-column>
+			<el-table-column prop="id" label="编号" width="150" align="center" />
+			<el-table-column prop="name" label="姓名" width="150" align="center" />
+			<el-table-column prop="intro" label="个人简介" header-align="center" />
+			<el-table-column prop="resume" label="职称" width="150" align="center" />
+			<el-table-column prop="pic" label="证件照" width="150" align="center">
 				<template #="{ row }">
 					<img class="table-avatar" :src="row.userpic" alt="">
 				</template>
 			</el-table-column>
-
-			<el-table-column label="操作" width="200">
+			<el-table-column label="操作" width="200" align="center">
 				<template #="{ row }">
-					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit" title="修改教师"></el-button>
-					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search" title="查看教师详情"></el-button>
+					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit"
+						title="修改教师"></el-button>
+					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search"
+						title="查看教师详情"></el-button>
 					<el-popconfirm title="确认删除吗?" @confirm="removeTeacher(row.id)">
 						<template #reference>
 							<el-button type="danger" size="small" icon="Delete" title="删除教师"></el-button>
@@ -32,12 +32,11 @@
 				</template>
 			</el-table-column>
 		</el-table>
-
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
-				@current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -47,26 +46,21 @@
 			<el-form-item label="教师姓名：">
 				<el-input v-model="newTeacher.username"></el-input>
 			</el-form-item>
-
 			<el-form-item label="教师职称：">
 				<el-select placeholder="please select your level" v-model="newTeacher.resume">
 					<el-option v-for="item in resumeOption" :key="item.value" :label="item.lable" :value="item.value">
 					</el-option>
 				</el-select>
 			</el-form-item>
-
 			<el-form-item label="教师性别：">
 				<el-radio-group v-model="newTeacher.sex">
 					<el-radio label="1">男</el-radio>
 					<el-radio label="0">女</el-radio>
 				</el-radio-group>
 			</el-form-item>
-
 			<el-form-item label="教师简介：">
 				<el-input type="textarea" v-model="newTeacher.intro" />
 			</el-form-item>
-
-
 			<el-form-item label="教师照片：">
 				<el-upload class="avatar-uploader" :http-request="uploadPic" :show-file-list="false"
 					:on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
@@ -76,15 +70,11 @@
 					</el-icon>
 				</el-upload>
 			</el-form-item>
-
-
-
 			<el-form-item>
 				<el-button v-if="editFlag" type="primary" @click="onEdit">修改</el-button>
 				<el-button v-else type="primary" @click="onSubmit">新增</el-button>
 				<el-button @click="cancel">取消</el-button>
 			</el-form-item>
-
 		</el-form>
 
 	</div>
@@ -106,7 +96,7 @@
 					<el-input v-model="teacherInfo.id"></el-input>
 				</el-form-item>
 				<el-form-item label="教师简介：">
-					<el-input v-model="teacherInfo.intro"></el-input>
+					<el-input type="textarea" v-model="teacherInfo.intro"></el-input>
 				</el-form-item>
 				<el-form-item label="教师职称：">
 					<el-input v-model="teacherInfo.resume"></el-input>
@@ -290,12 +280,18 @@ const textChange = async () => {
 	// }
 }
 
+// 添加教师按钮回调
+const addTeacherBtn = () => {
+	isAdd.value = true
+	editFlag.value = false
+}
+
 // 确认添加按钮回调
 const onSubmit = async () => {
 
 	// 为啥后端接口里同一个意思要整两个字段啊aaaaaaa
 	newTeacher.value.name = newTeacher.value.username
-	newTeacher.value.userpic = newTeacher.value.pic	
+	newTeacher.value.userpic = newTeacher.value.pic
 
 	// 发起添加教师请求
 	let result = await reqAddTeacher(newTeacher.value)

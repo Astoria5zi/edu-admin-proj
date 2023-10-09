@@ -10,9 +10,7 @@ enum API {
     GETCOURSEBYID_URL = '/course/',
     // 查询树状课程接口
     TREENODECOURSE_URL = '/course-category/tree-nodes/',
-
-
-
+    
 }
 
 // 获取所有课程信息接口

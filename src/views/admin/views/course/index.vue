@@ -5,12 +5,7 @@
 		<el-input placeholder="输入课程名称" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" /> -->
 
     <!-- 课程的级联选择器 -->
-    <el-cascader
-      v-model="cascaderValue"
-      :options="treeNodeCourseArr"
-      @change="handleChange"
-      :props="cascaderProps"
-    >
+    <el-cascader v-model="cascaderValue" :options="treeNodeCourseArr" @change="handleChange" :props="cascaderProps">
       <template #default="{ node, data }">
         <span>{{ data.label }}</span>
         <span v-if="!node.isLeaf"> ({{ data.childrenTreeNodes.length }}) </span>
@@ -18,55 +13,26 @@
     </el-cascader>
 
     <!-- 添加课程按钮 -->
-    <el-button type="primary" size="default" @click="isAdd = true" style="margin: 10px"
-      >添加课程</el-button
-    >
+    <el-button type="primary" size="default" @click="isAdd = true" style="margin: 10px">添加课程</el-button>
 
     <!-- 展示课程列表 -->
     <el-table :data="computedCoursesArr" border style="width: 100%" max-height="650">
-      <el-table-column
-        label="序号"
-        type="index"
-        algin="center"
-        width="60"
-      ></el-table-column>
+      <el-table-column label="序号" type="index" algin="center" width="60"></el-table-column>
       <el-table-column prop="id" label="ID" width="60"></el-table-column>
       <el-table-column prop="name" label="课程名称" width="180" />
       <el-table-column prop="description" label="课程简介" show-overflow-tooltip />
-      <el-table-column
-        prop="createPeople"
-        label="授课教师"
-        width="120"
-        show-overflow-tooltip
-      />
+      <el-table-column prop="createPeople" label="授课教师" width="120" show-overflow-tooltip />
       <el-table-column prop="users" label="适合人群" width="120" show-overflow-tooltip />
       <el-table-column prop="status" label="课程状态" width="100" />
       <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip />
 
       <el-table-column label="操作" width="200">
         <template #="{ row }">
-          <el-button
-            type="primary"
-            size="small"
-            @click=""
-            icon="Edit"
-            title="修改课程信息"
-          ></el-button>
-          <el-button
-            type="primary"
-            size="small"
-            @click="searchCourse(row.id)"
-            icon="Search"
-            title="查看课程信息"
-          ></el-button>
+          <el-button type="primary" size="small" @click="" icon="Edit" title="修改课程信息"></el-button>
+          <el-button type="primary" size="small" @click="searchCourse(row.id)" icon="Search" title="查看课程信息"></el-button>
           <el-popconfirm title="确认删除吗?" @confirm="removeCourse(row.id)">
             <template #reference>
-              <el-button
-                type="danger"
-                size="small"
-                icon="Delete"
-                title="删除课程"
-              ></el-button>
+              <el-button type="danger" size="small" icon="Delete" title="删除课程"></el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -75,28 +41,15 @@
 
     <!-- 分页器 -->
     <div class="demo-pagination-block" style="margin: 10px 0">
-      <el-pagination
-        v-model:current-page="pageNo"
-        v-model:page-size="pageSize"
-        :page-sizes="[5, 10, 20, 40]"
-        :background="true"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
+      <el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
+        :background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
+        @current-change="handleCurrentChange" />
     </div>
   </div>
 
   <!-- 添加课程界面 -->
   <div v-if="isAdd" class="add-container">
-    <el-form
-      :model="newTeacher"
-      ref="form"
-      label-width="120px"
-      :inline="false"
-      style="max-width: 460px"
-    >
+    <el-form :model="newTeacher" ref="form" label-width="120px" :inline="false" style="max-width: 460px">
       <el-form-item label="教师姓名：">
         <el-input v-model="newTeacher.name"></el-input>
       </el-form-item>
@@ -111,11 +64,8 @@
         <el-input type="textarea" v-model="newTeacher.intro" />
       </el-form-item>
       <el-form-item label="教师照片：">
-        <el-upload
-          class="avatar-uploader"
-          action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-          :show-file-list="false"
-        >
+        <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
+          :show-file-list="false">
           <img v-if="false" class="avatar" />
           <el-icon v-else class="avatar-uploader-icon">
             <Plus />
@@ -131,24 +81,14 @@
 
   <!-- 课程详细界面卡片 -->
   <div class="courseinfo" v-if="courseInfoFlag" @click="courseInfoFlag = false">
-    <el-card
-      shadow="always"
-      :body-style="{ padding: '20px' }"
-      @click.stop="courseInfoFlag = true"
-    >
+    <el-card shadow="always" :body-style="{ padding: '20px' }" @click.stop="courseInfoFlag = true">
       <template #header>
         <div class="card-header">
           <span>课程详情</span>
         </div>
       </template>
-      <el-form
-        :model="courseInfo"
-        ref="form"
-        label-width="100px"
-        :inline="false"
-        style="max-width: 460px"
-        label-position="left"
-      >
+      <el-form :model="courseInfo" ref="form" label-width="100px" :inline="false" style="max-width: 460px"
+        label-position="left">
         <el-form-item label="课程名称：">
           <el-input v-model="courseInfo.name"></el-input>
         </el-form-item>
@@ -185,7 +125,7 @@ import { Search } from "@element-plus/icons-vue";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { Picture as IconPicture } from "@element-plus/icons-vue";
 // 获取课程相关接口
-import { reqCourseList, reqGetCourseById, reqGetTreeNodeCourse ,reqGetTreeNodeCourseById} from "@/api/course";
+import { reqCourseList, reqGetCourseById, reqGetTreeNodeCourse, reqGetTreeNodeCourseById } from "@/api/course";
 
 // 当前页码
 let pageNo = ref(1);
@@ -223,7 +163,6 @@ let courseInfo = reactive({
 });
 // 新增课程表单对象
 let newCourse = ref({});
-
 // 树状课程数组
 let treeNodeCourseArr = ref([]);
 // 级联选择器绑定值
@@ -232,8 +171,8 @@ let cascaderValue = ref([]);
 const cascaderProps = {
   children: "childrenTreeNodes",
   expandTrigger: "hover",
-  value:'id',
-  label:'label'
+  value: 'id',
+  label: 'label'
 };
 
 // 封装获取课程方法
@@ -297,11 +236,11 @@ const onSubmit = async () => {
 
 // 级联选择器绑定值变化触发回调
 const handleChange = async (value) => {
- console.log(value);
- 
- let result = await reqGetTreeNodeCourseById(value.at(-1))
- console.log(result);
- 
+  console.log(value);
+
+  let result = await reqGetTreeNodeCourseById(value.at(-1))
+  console.log(result);
+
 };
 
 
