@@ -97,6 +97,13 @@ export const constantRoute = [
 					title: '课程管理',
 				},
 			},
+			// 管理中心 -- 用户管理
+			{
+				path: '/admin/user', component: () => import('@/views/admin/views/user/index.vue'), name: 'user',
+				meta: {
+					title: '用户管理',
+				},
+			},
 		]
 	},
 ]
