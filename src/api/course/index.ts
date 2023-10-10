@@ -16,7 +16,9 @@ enum API {
 	// 新增课程接口
 	ADDNEWCOURSE_URL = '/course/add',
 	// 删除课程接口
-	REMOVECOURSE_URL = '/course/delete/'
+	REMOVECOURSE_URL = '/course/delete/',
+	// 修改课程接口
+	EDITCOURSE_URL = '/course/update'
 
 }
 
@@ -46,3 +48,6 @@ export const reqAddNewCourse = (addCourseDto: any) => request.post<any, any>(API
 
 // 按id删除课程方法
 export const reqRemoveCourse = (id: number) => request.delete<any, any>(API.REMOVECOURSE_URL + `${id}`)
+
+// 修改课程方法
+export const reqEditCourse = (editCourseDto: any) => request.put<any, any>(API.EDITCOURSE_URL, editCourseDto)

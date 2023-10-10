@@ -26,11 +26,14 @@
       <el-table-column prop="createPeople" label="授课教师" width="120" show-overflow-tooltip />
       <el-table-column prop="users" label="适合人群" width="120" show-overflow-tooltip />
       <el-table-column prop="status" label="课程状态" width="100" />
-      <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip />
-
+      <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip>
+        <template #="{ row }">
+          <img :src="row.pic" alt="" class="table-avatar">
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="200">
         <template #="{ row }">
-          <el-button type="primary" size="small" @click="" icon="Edit" title="修改课程信息"></el-button>
+          <el-button type="primary" size="small" @click="editCourse(row.id)" icon="Edit" title="修改课程信息"></el-button>
           <el-button type="primary" size="small" @click="searchCourse(row.id)" icon="Search" title="查看课程信息"></el-button>
           <el-popconfirm title="确认删除吗?" @confirm="removeCourse(row.id)">
             <template #reference>
@@ -72,7 +75,7 @@
       </el-form-item>
       <el-form-item label="授课教师：">
         <el-select v-model="newCourse.teacherId" placeholder="请选择">
-          <el-option v-for="  item   in   teachersIdArr  " :key="item.id" :label="item.name" :value="item.id" />
+          <el-option v-for="item in teachersIdArr" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-form-item label="有效日期：">
@@ -94,8 +97,9 @@
         </el-upload>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="onSubmit">添加课程</el-button>
-        <el-button @click="isAdd = false">取消</el-button>
+        <el-button v-if="idEdit" type="primary" @click="onEdit">修改课程</el-button>
+        <el-button v-else type="primary" @click="onSubmit">添加课程</el-button>
+        <el-button @click="btnCancel">取消</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -139,7 +143,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref} from "vue";
+import { nextTick, onMounted, reactive, ref } from "vue";
 import { Picture as IconPicture } from "@element-plus/icons-vue";
 // 获取课程相关接口
 import {
@@ -149,7 +153,8 @@ import {
   reqGetTreeNodeCourseById,
   reqGetCourseBySt,
   reqAddNewCourse,
-  reqRemoveCourse
+  reqRemoveCourse,
+  reqEditCourse
 } from "@/api/course";
 // 引入教师相关接口
 import { reqGetTeacherList } from "@/api/teacher";
@@ -165,11 +170,10 @@ let pageSize = ref(5);
 let total = ref(0);
 // 是否点击添加课程
 let isAdd = ref(false);
+// 是否点击修改课程
+let idEdit = ref(false)
 // 存储课程列表
 let coursesArr = ref([]);
-// 搜索框关键字
-let keyWords = ref("");
-
 // 查询课程详细信息的标志
 let courseInfoFlag = ref(false);
 // 获取教师id数组
@@ -216,14 +220,8 @@ const cascaderProps = {
   value: 'id',
   label: 'label'
 };
-
-
 // 是否正在按条件查询标志
 let isConditonFlag = ref(false)
-// 条件查询课程数组
-let conditionCourseArr = ref([])
-
-
 // 封装获取课程方法
 const getCourses = async () => {
   let result = await reqCourseList(pageNo.value, pageSize.value, {
@@ -338,6 +336,29 @@ const chooseSt = (value: any) => {
   newCourse.value.mt = value.at(0)
 }
 
+// 修改课程按钮回调
+const editCourse = async (id: number) => {
+  newCourse.value = await reqGetCourseById(id)
+  idEdit.value = true
+  isAdd.value = true
+}
+
+// 确定修改按钮回调
+const onEdit = async () => {
+  await reqEditCourse(newCourse.value)
+  getCourses()
+  // 关闭表单页面
+  isAdd.value = false
+  // 擦除修改标识
+  idEdit.value = false
+}
+
+// 新增/修改界面的取消按钮
+const btnCancel = () => {
+  isAdd.value = false
+  idEdit.value = false
+}
+
 
 </script>
 
@@ -406,6 +427,11 @@ const chooseSt = (value: any) => {
 
 .demo-image__error .image-slot .el-icon {
   font-size: 30px;
+}
+
+.table-avatar {
+  height: 60px;
+  width: 100%;
 }
 </style>
 
