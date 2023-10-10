@@ -5,16 +5,16 @@ import request from "@/utils/request"
 // 课程用户相关的请求地址
 enum API {
 
-    // 获取分页课程列表接口
-    COURSELIST_URL = "/course/list?",
-    // 根据id查询课程详细信息
-    GETCOURSEBYID_URL = '/course/',
-    // 查询树状课程接口
-    TREENODECOURSE_URL = '/course-category/tree-nodes/',
-    // 根据小分类节点查询课程信息(st:small treenodes?)
-    GETCOURSEBYST_URL = '/course-category/st/',
-    // 新增课程接口
-    ADDNEWCOURSE_URL = '/course/add'
+	// 获取分页课程列表接口
+	COURSELIST_URL = "/course/list?",
+	// 根据id查询课程详细信息
+	GETCOURSEBYID_URL = '/course/',
+	// 查询树状课程接口
+	TREENODECOURSE_URL = '/course-category/tree-nodes/',
+	// 根据小分类节点查询课程信息(st:small treenodes?)
+	GETCOURSEBYST_URL = '/course-category/st?',
+	// 新增课程接口
+	ADDNEWCOURSE_URL = '/course/add'
 
 }
 
@@ -31,7 +31,13 @@ export const reqGetTreeNodeCourse = () => request.get<any, any>(API.TREENODECOUR
 export const reqGetTreeNodeCourseById = (id: number) => request.get<any, any>(API.TREENODECOURSE_URL + `${id}`)
 
 // 根据小分类节点查询课程信息方法
-export const reqGetCourseBySt = (nodeId: string) => request.get<any, any>(API.GETCOURSEBYST_URL + `${nodeId}`)
+export const reqGetCourseBySt = (nodeId: string, pageNo?: number, pageSize?: number) => {
+	if (!pageNo && !pageSize) {
+		return request.post<any, any>(API.GETCOURSEBYST_URL + `nodeId=${nodeId}`)
+	} else {
+		return request.post<any, any>(API.GETCOURSEBYST_URL + `nodeId=${nodeId}&pageNo=${pageNo}&pageSize=${pageSize}`)
+	}
+}
 
 // 新增课程方法
 export const reqAddNewCourse = (addCourseDto: any) => request.post<any, any>(API.ADDNEWCOURSE_URL, addCourseDto)

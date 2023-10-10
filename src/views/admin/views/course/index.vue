@@ -5,7 +5,8 @@
 		<el-input placeholder="输入课程名称" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" /> -->
 
     <!-- 课程的级联选择器 -->
-    <el-cascader v-model="cascaderValue" :options="treeNodeCourseArr" @change="handleChange" :props="cascaderProps">
+    <el-cascader v-model="cascaderValue" :options="treeNodeCourseArr" @change="handleChange" :props="cascaderProps"
+      clearable>
       <template #default="{ node, data }">
         <span>{{ data.label }}</span>
         <span v-if="!node.isLeaf"> ({{ data.childrenTreeNodes.length }}) </span>
@@ -16,7 +17,7 @@
     <el-button type="primary" size="default" @click="btnAddCourse" style="margin: 10px">添加课程</el-button>
 
     <!-- 展示课程列表 -->
-    <el-table :data="computedCoursesArr" border style="width: 100%" max-height="650">
+    <el-table :data="coursesArr" border style="width: 100%" max-height="650">
       <el-table-column label="序号" type="index" algin="center" width="60"></el-table-column>
       <el-table-column prop="id" label="ID" width="60"></el-table-column>
       <el-table-column prop="name" label="课程名称" width="180" />
@@ -170,12 +171,7 @@ let isAdd = ref(false);
 let coursesArr = ref([]);
 // 搜索框关键字
 let keyWords = ref("");
-// 计算属性课程列表
-const computedCoursesArr = computed(() => {
-  return coursesArr.value.filter((item: any) => {
-    return item.name.includes(keyWords.value);
-  });
-});
+
 // 查询课程详细信息的标志
 let courseInfoFlag = ref(false);
 // 获取教师id数组
@@ -214,7 +210,7 @@ let newCourse = ref({
 // 树状课程数组
 let treeNodeCourseArr = ref([]);
 // 级联选择器绑定值
-let cascaderValue = ref([]);
+let cascaderValue = ref<string[]>([]);
 // 级联选择器配置对象
 const cascaderProps = {
   children: "childrenTreeNodes",
@@ -223,13 +219,12 @@ const cascaderProps = {
   label: 'label'
 };
 
-/** 
- * 
-是否正在按条件查询标志
+
+// 是否正在按条件查询标志
 let isConditonFlag = ref(false)
-条件查询课程数组
+// 条件查询课程数组
 let conditionCourseArr = ref([])
-*/
+
 
 // 封装获取课程方法
 const getCourses = async () => {
@@ -253,10 +248,6 @@ onMounted(async () => {
 
 });
 
-// 搜索框关键字发生变化
-watch(computedCoursesArr, () => {
-  // console.log(computedCoursesArr.value);
-});
 
 // 删除按钮回调
 const removeCourse = async (id: number) => {
@@ -265,13 +256,32 @@ const removeCourse = async (id: number) => {
 };
 
 // 当前页面改变触发回调
-const handleCurrentChange = () => {
-  getCourses();
+const handleCurrentChange = async () => {
+  // 判断当前是否正在按条件查询
+  // 如果是，则调用按条件查询课程的接口
+  if (isConditonFlag.value = true) {
+    let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
+    coursesArr.value = result.items
+  }
+  // 否则调用基本获取课程的接口
+  else {
+    getCourses();
+  }
 };
 
 // 页面大小改变触发回调
-const handleSizeChange = () => {
-  getCourses();
+const handleSizeChange = async () => {
+  // 判断当前是否正在按条件查询
+  // 如果是，则调用按条件查询课程的接口
+  if (isConditonFlag.value = true) {
+    let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
+    coursesArr.value = result.items
+  }
+  // 否则调用基本获取课程的接口
+  else {
+    getCourses();
+  }
+
 };
 
 // 查看课程按详细信息按钮回调
@@ -285,7 +295,6 @@ const searchCourse = async (id: number) => {
 // 添加课程按钮回调
 const btnAddCourse = () => {
   isAdd.value = true
-
 }
 
 // 确认添加按钮回调
@@ -303,8 +312,27 @@ const onSubmit = async () => {
 
 // 列表页面级联选择器绑定值变化触发回调
 const handleChange = async (value: any) => {
-  let result = await reqGetCourseBySt(value.at(-1))
-  coursesArr.value = result
+
+  // 先判断当前级联选择器绑定值是否为空
+  // 空 -- 按基本方式获取课程列表
+  // 用于清空条件后重新获取全部课程信息
+  if (!value) {
+    getCourses();    
+  } 
+  // 不为空 -- 进行条件查询
+  else {
+    // 开启按条件查询课程标志
+    isConditonFlag.value = true
+    // 先获取当前条件下的课程总数
+    let result = await reqGetCourseBySt(value.at(-1))
+    total.value = result.items.length
+    // 然后发分页请求
+    result = await reqGetCourseBySt(value.at(-1), pageNo.value, pageSize.value)
+    coursesArr.value = result.items
+  }
+
+
+
 };
 
 // 新增课程中的级联选择器变化触发回调
