@@ -1,8 +1,6 @@
 <template>
   <!-- 展示课程列表以及操作 -->
   <div v-if="!isAdd" class="teacher-table">
-    <!-- 搜索框
-		<el-input placeholder="输入课程名称" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" /> -->
 
     <!-- 课程的级联选择器 -->
     <el-cascader v-model="cascaderValue" :options="treeNodeCourseArr" @change="handleChange" :props="cascaderProps"
@@ -13,8 +11,8 @@
       </template>
     </el-cascader>
 
+    <!-- 课程查询按钮 -->
     <el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询</el-button>
-
 
     <!-- 添加课程按钮 -->
     <el-button type="primary" size="default" @click="btnAddCourse">添加课程</el-button>
@@ -124,9 +122,6 @@
         <el-form-item label="课程有效期：">
           <el-input v-model="courseInfo.validDays"></el-input>
         </el-form-item>
-        <el-form-item label="咨询电话：">
-          <el-input v-model="courseInfo.phone"></el-input>
-        </el-form-item>
         <el-form-item label="课程封面：" class="demo-image__error">
           <div class="block">
             <el-image :src="courseInfo.pic">
@@ -144,8 +139,7 @@
 </template>
 
 <script setup lang="ts">
-import { Search } from "@element-plus/icons-vue";
-import { computed, onMounted, reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref} from "vue";
 import { Picture as IconPicture } from "@element-plus/icons-vue";
 // 获取课程相关接口
 import {
@@ -154,7 +148,8 @@ import {
   reqGetTreeNodeCourse,
   reqGetTreeNodeCourseById,
   reqGetCourseBySt,
-  reqAddNewCourse
+  reqAddNewCourse,
+  reqRemoveCourse
 } from "@/api/course";
 // 引入教师相关接口
 import { reqGetTeacherList } from "@/api/teacher";
@@ -255,7 +250,8 @@ onMounted(async () => {
 // 删除按钮回调
 const removeCourse = async (id: number) => {
   // 发起删除请求
-  console.log(id);
+  await reqRemoveCourse(id)
+  await getCourses()
 };
 
 // 当前页面改变触发回调

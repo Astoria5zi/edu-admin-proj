@@ -14,7 +14,9 @@ enum API {
 	// 根据小分类节点查询课程信息(st:small treenodes?)
 	GETCOURSEBYST_URL = '/course-category/st?',
 	// 新增课程接口
-	ADDNEWCOURSE_URL = '/course/add'
+	ADDNEWCOURSE_URL = '/course/add',
+	// 删除课程接口
+	REMOVECOURSE_URL = '/course/delete/'
 
 }
 
@@ -41,3 +43,6 @@ export const reqGetCourseBySt = (nodeId: string, pageNo?: number, pageSize?: num
 
 // 新增课程方法
 export const reqAddNewCourse = (addCourseDto: any) => request.post<any, any>(API.ADDNEWCOURSE_URL, addCourseDto)
+
+// 按id删除课程方法
+export const reqRemoveCourse = (id: number) => request.delete<any, any>(API.REMOVECOURSE_URL + `${id}`)
