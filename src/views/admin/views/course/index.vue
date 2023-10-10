@@ -39,6 +39,7 @@
       </el-table-column>
     </el-table>
 
+
     <!-- 分页器 -->
     <div class="demo-pagination-block" style="margin: 10px 0">
       <el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
@@ -67,30 +68,16 @@
           </template>
         </el-cascader>
       </el-form-item>
-
+      <el-form-item label="授课教师：">
+        <el-select v-model="newCourse.teacherId" placeholder="请选择">
+          <el-option v-for="item in teachersIdArr" :key="item.id" :label="item.name" :value="item.id" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="有效日期：">
         <el-input v-model="newCourse.validDays" />
       </el-form-item>
       <el-form-item label="适用人群：">
         <el-input v-model="newCourse.users" />
-      </el-form-item>
-      <el-form-item label="课程标签：">
-        <el-input v-model="newCourse.tags" />
-      </el-form-item>
-      <el-form-item label="授课模式：">
-        <el-input v-model="newCourse.teachmode" />
-      </el-form-item>
-      <el-form-item label="课程QQ：">
-        <el-input v-model="newCourse.qq" />
-      </el-form-item>
-      <el-form-item label="课程微信：">
-        <el-input v-model="newCourse.wechat" />
-      </el-form-item>
-      <el-form-item label="课程手机：">
-        <el-input v-model="newCourse.phone" />
-      </el-form-item>
-      <el-form-item label="课程等级：">
-        <el-input v-model="newCourse.grade" />
       </el-form-item>
       <el-form-item label="课程描述：">
         <el-input type="textarea" v-model="newCourse.description" />
@@ -165,20 +152,22 @@ import {
   reqGetCourseBySt,
   reqAddNewCourse
 } from "@/api/course";
+// 引入教师相关接口
+import { reqGetTeacherList } from "@/api/teacher";
 // 引入课程接口类型
 // 引入接口类型
-import { AddcourseResponse } from '@/api/course/type'
+// import { AddcourseResponse } from '@/api/course/type'
 
 // 当前页码
 let pageNo = ref(1);
 // 页码大小
 let pageSize = ref(5);
-// 教师总数量
+// 课程总数量
 let total = ref(0);
 // 是否点击添加课程
 let isAdd = ref(false);
 // 存储课程列表
-let coursesArr = ref<AddcourseResponse[]>([]);
+let coursesArr = ref([]);
 // 搜索框关键字
 let keyWords = ref("");
 // 计算属性课程列表
@@ -189,6 +178,8 @@ const computedCoursesArr = computed(() => {
 });
 // 查询课程详细信息的标志
 let courseInfoFlag = ref(false);
+// 获取教师id数组
+let teachersIdArr = ref()
 // 存储课程详细信息
 let courseInfo = reactive({
   name: "",
@@ -209,19 +200,14 @@ let newCourse = ref({
   "charge": "201001", // 000免费 001收费
   "price": '1',
   "originalPrice": '1',
-  "qq": "2431221241",
-  "wechat": "2431221241",
-  "phone": "17777777777",
   "validDays": 365,
-  "mt": "1-1",
-  "st": "1-1-1",
-  "name": "前端课程1",
+  "mt": "",
+  "st": "",
+  "name": "",
   "pic": "无",
-  "teachmode": "200002",
   "users": "初级人员",
-  "tags": "",
-  "grade": "204001",
-  "description": ""
+  "description": "",
+  "teacherId": " "
 
 
 });
@@ -237,12 +223,21 @@ const cascaderProps = {
   label: 'label'
 };
 
+/** 
+ * 
+是否正在按条件查询标志
+let isConditonFlag = ref(false)
+条件查询课程数组
+let conditionCourseArr = ref([])
+*/
+
 // 封装获取课程方法
 const getCourses = async () => {
   let result = await reqCourseList(pageNo.value, pageSize.value, {
     auditStatus: "",
     courseName: "",
   });
+
   coursesArr.value = result.items;
   total.value = result.counts;
 };
@@ -250,10 +245,12 @@ const getCourses = async () => {
 // 组件挂载时获课程师信息
 onMounted(async () => {
   getCourses();
-
   // 获取所有一级分类ID
-  let result = await reqGetTreeNodeCourse();
-  treeNodeCourseArr.value = result;
+  treeNodeCourseArr.value = await reqGetTreeNodeCourse();
+  // 获取所有教师信息(用于新增课程时选择教师)
+  let result = await reqGetTeacherList()
+  teachersIdArr.value = result.items.map((item: any) => ({ id: item.id, name: item.name }));
+
 });
 
 // 搜索框关键字发生变化
@@ -269,7 +266,6 @@ const removeCourse = async (id: number) => {
 
 // 当前页面改变触发回调
 const handleCurrentChange = () => {
-
   getCourses();
 };
 
@@ -297,16 +293,15 @@ const onSubmit = async () => {
   // 返回课程列表
   isAdd.value = false;
   // 发起添加教师请求
-  let result: AddcourseResponse = await reqAddNewCourse(newCourse.value);
+  let result = await reqAddNewCourse(newCourse.value);
+  console.log(result);
 
-  // 请求成功以后将新课程push进数组
-  coursesArr.value.push(result)
   // 数组大小发生变化 这样还是会触发totalchange钩子
   // total.value = coursesArr.value.length
   getCourses();
 };
 
-// 级联选择器绑定值变化触发回调
+// 列表页面级联选择器绑定值变化触发回调
 const handleChange = async (value: any) => {
   let result = await reqGetCourseBySt(value.at(-1))
   coursesArr.value = result

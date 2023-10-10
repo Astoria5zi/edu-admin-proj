@@ -17,7 +17,15 @@ enum API {
 }
 
 // 获取所有教师信息请求
-export const reqGetTeacherList = (pageNo: number, pageSize: number) => request.post<any, any>(API.GETTEACHERLIST_URL + `pageNo=${pageNo}&pageSize=${pageSize}`)
+export const reqGetTeacherList = (pageNo?: number, pageSize?: number) => {
+
+    if (!pageNo && !pageSize) {
+        return request.post<any, any>(API.GETTEACHERLIST_URL)
+    }
+    else {
+        return request.post<any, any>(API.GETTEACHERLIST_URL + `pageNo=${pageNo}&pageSize=${pageSize}`)
+    }
+}
 
 // 根据ID删除教师信息
 export const reqDeleteTeacher = (id: number) => request.delete<any, any>(API.DELETETEACHER_URL + id)

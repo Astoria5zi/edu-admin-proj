@@ -1,7 +1,7 @@
 // 统一管理课程相关的接口
 import request from "@/utils/request"
 // 引入接口类型
-import { AddcourseResponse } from './type'
+// import { AddcourseResponse } from './type'
 // 课程用户相关的请求地址
 enum API {
 
@@ -34,4 +34,4 @@ export const reqGetTreeNodeCourseById = (id: number) => request.get<any, any>(AP
 export const reqGetCourseBySt = (nodeId: string) => request.get<any, any>(API.GETCOURSEBYST_URL + `${nodeId}`)
 
 // 新增课程方法
-export const reqAddNewCourse = (addCourseDto: any) => request.post<any, AddcourseResponse>(API.ADDNEWCOURSE_URL, addCourseDto)
+export const reqAddNewCourse = (addCourseDto: any) => request.post<any, any>(API.ADDNEWCOURSE_URL, addCourseDto)
