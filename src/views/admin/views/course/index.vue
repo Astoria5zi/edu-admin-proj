@@ -13,8 +13,11 @@
       </template>
     </el-cascader>
 
+    <el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询</el-button>
+
+
     <!-- 添加课程按钮 -->
-    <el-button type="primary" size="default" @click="btnAddCourse" style="margin: 10px">添加课程</el-button>
+    <el-button type="primary" size="default" @click="btnAddCourse">添加课程</el-button>
 
     <!-- 展示课程列表 -->
     <el-table :data="coursesArr" border style="width: 100%" max-height="650">
@@ -71,7 +74,7 @@
       </el-form-item>
       <el-form-item label="授课教师：">
         <el-select v-model="newCourse.teacherId" placeholder="请选择">
-          <el-option v-for="item in teachersIdArr" :key="item.id" :label="item.name" :value="item.id" />
+          <el-option v-for="  item   in   teachersIdArr  " :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-form-item label="有效日期：">
@@ -259,7 +262,7 @@ const removeCourse = async (id: number) => {
 const handleCurrentChange = async () => {
   // 判断当前是否正在按条件查询
   // 如果是，则调用按条件查询课程的接口
-  if (isConditonFlag.value = true) {
+  if (isConditonFlag.value) {
     let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
     coursesArr.value = result.items
   }
@@ -312,28 +315,26 @@ const onSubmit = async () => {
 
 // 列表页面级联选择器绑定值变化触发回调
 const handleChange = async (value: any) => {
-
-  // 先判断当前级联选择器绑定值是否为空
-  // 空 -- 按基本方式获取课程列表
-  // 用于清空条件后重新获取全部课程信息
+  // 如果条件被清空，关闭按条件查询
   if (!value) {
-    getCourses();    
-  } 
-  // 不为空 -- 进行条件查询
-  else {
-    // 开启按条件查询课程标志
-    isConditonFlag.value = true
-    // 先获取当前条件下的课程总数
-    let result = await reqGetCourseBySt(value.at(-1))
-    total.value = result.items.length
-    // 然后发分页请求
-    result = await reqGetCourseBySt(value.at(-1), pageNo.value, pageSize.value)
-    coursesArr.value = result.items
+    isConditonFlag.value = false
+    pageNo.value = 1
+    await getCourses();
   }
-
-
-
 };
+
+// 点击查询按钮回调
+const btnInquire = async () => {
+  // 开启按条件查询课程标志
+  isConditonFlag.value = true
+  // 先获取当前条件下的课程总数
+  let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string)
+  total.value = result.items.length
+  // 然后发分页请求
+  pageNo.value = 1
+  result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
+  coursesArr.value = result.items
+}
 
 // 新增课程中的级联选择器变化触发回调
 const chooseSt = (value: any) => {
