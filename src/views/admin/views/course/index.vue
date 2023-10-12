@@ -18,15 +18,15 @@
     <el-button type="primary" size="default" @click="btnAddCourse">添加课程</el-button>
 
     <!-- 展示课程列表 -->
-    <el-table :data="coursesArr" border style="width: 100%" max-height="650">
-      <el-table-column label="序号" type="index" algin="center" width="60"></el-table-column>
-      <el-table-column prop="id" label="ID" width="60"></el-table-column>
-      <el-table-column prop="name" label="课程名称" width="180" />
-      <el-table-column prop="description" label="课程简介" show-overflow-tooltip />
-      <el-table-column prop="createPeople" label="授课教师" width="120" show-overflow-tooltip />
-      <el-table-column prop="users" label="适合人群" width="120" show-overflow-tooltip />
-      <el-table-column prop="status" label="课程状态" width="100" />
-      <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip>
+    <el-table :data="coursesArr" border style="width: 100%" max-height="700">
+      <el-table-column label="序号" type="index" algin="center" width="60" align="center"></el-table-column>
+      <el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
+      <el-table-column prop="name" label="课程名称" width="180" align="center"/>
+      <el-table-column prop="description" label="课程简介" show-overflow-tooltip align="center"/>
+      <el-table-column prop="createDate" label="上传时间" width="200" show-overflow-tooltip align="center"/>
+      <el-table-column prop="users" label="适合人群" width="120" show-overflow-tooltip  align="center"/>
+      <el-table-column prop="status" label="课程状态" width="100" align="center"/>
+      <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
         <template #="{ row }">
           <img :src="row.pic" alt="" class="table-avatar">
         </template>
@@ -88,9 +88,8 @@
         <el-input type="textarea" v-model="newCourse.description" />
       </el-form-item>
       <el-form-item label="课程照片：">
-        <el-upload class="avatar-uploader" action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-          :show-file-list="false">
-          <img v-if="false" class="avatar" :src="newCourse.pic" />
+        <el-upload class="avatar-uploader" :http-request="uploadPic" :show-file-list="false">
+          <img v-if="newCourse.pic" class="avatar" :src="newCourse.pic" />
           <el-icon v-else class="avatar-uploader-icon">
             <Plus />
           </el-icon>
@@ -158,6 +157,8 @@ import {
 } from "@/api/course";
 // 引入教师相关接口
 import { reqGetTeacherList } from "@/api/teacher";
+// 获取上传文件接口
+import { reqUploadFile } from '@/api/common'
 // 引入课程接口类型
 // 引入接口类型
 // import { AddcourseResponse } from '@/api/course/type'
@@ -205,9 +206,10 @@ let newCourse = ref({
   "pic": "无",
   "users": "初级人员",
   "description": "",
-  "teacherId": " "
-
-
+  "mtName": "",
+  "stName": "",
+  "teacherId": "",
+  "teacherName": ""
 });
 // 树状课程数组
 let treeNodeCourseArr = ref([]);
@@ -270,7 +272,7 @@ const handleCurrentChange = async () => {
 const handleSizeChange = async () => {
   // 判断当前是否正在按条件查询
   // 如果是，则调用按条件查询课程的接口
-  if (isConditonFlag.value = true) {
+  if (isConditonFlag.value) {
     let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
     coursesArr.value = result.items
   }
@@ -299,8 +301,7 @@ const onSubmit = async () => {
   // 返回课程列表
   isAdd.value = false;
   // 发起添加教师请求
-  let result = await reqAddNewCourse(newCourse.value);
-  console.log(result);
+  await reqAddNewCourse(newCourse.value);
 
   // 数组大小发生变化 这样还是会触发totalchange钩子
   // total.value = coursesArr.value.length
@@ -339,6 +340,8 @@ const chooseSt = (value: any) => {
 // 修改课程按钮回调
 const editCourse = async (id: number) => {
   newCourse.value = await reqGetCourseById(id)
+  console.log(newCourse.value);
+
   idEdit.value = true
   isAdd.value = true
 }
@@ -357,6 +360,22 @@ const onEdit = async () => {
 const btnCancel = () => {
   isAdd.value = false
   idEdit.value = false
+}
+
+// 自定义upload的事件覆盖el-upload的action
+const uploadPic = async (param: any) => {
+
+  // 创建FormData对象，用于将文件对象包装成表单数据
+  const formData = new FormData()
+  formData.append('file', param.file)
+  let result = await reqUploadFile(formData)
+
+  // 调用onSuccess钩子，传入响应式数据
+  param.onSuccess(result.code, param.file)
+
+  // 上传后从远程服务器要文件地址进行赋值
+  newCourse.value.pic = result.data
+
 }
 
 
@@ -392,7 +411,7 @@ const btnCancel = () => {
 }
 
 .avatar-uploader .avatar {
-  width: 178px;
+  min-width: 178px;
   height: 178px;
   display: block;
   // background-color: #bcf;
