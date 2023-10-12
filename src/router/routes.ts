@@ -95,7 +95,14 @@ export const constantRoute = [
 				path: '/admin/course', component: () => import('@/views/admin/views/course/index.vue'), name: 'course',
 				meta: {
 					title: '课程管理',
-				},
+				}
+			},
+			// 管理中心 -- 课程审核
+			{
+				path: '/admin/coursecheck', component: () => import('@/views/admin/views/coursecheck/index.vue'), name: 'coursecheck',
+				meta: {
+					title: '课程审核',
+				}
 			},
 			// 管理中心 -- 用户管理
 			{

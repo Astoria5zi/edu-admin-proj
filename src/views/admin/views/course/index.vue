@@ -21,29 +21,58 @@
     <el-table :data="coursesArr" border style="width: 100%" max-height="700">
       <el-table-column label="序号" type="index" algin="center" width="60" align="center"></el-table-column>
       <el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
-      <el-table-column prop="name" label="课程名称" width="180" align="center"/>
-      <el-table-column prop="description" label="课程简介" show-overflow-tooltip align="center"/>
-      <el-table-column prop="createDate" label="上传时间" width="200" show-overflow-tooltip align="center"/>
-      <el-table-column prop="users" label="适合人群" width="120" show-overflow-tooltip  align="center"/>
-      <el-table-column prop="status" label="课程状态" width="100" align="center"/>
+      <el-table-column prop="name" label="课程名称" width="180" align="center" />
+      <el-table-column prop="description" label="课程简介" show-overflow-tooltip align="center" />
+      <el-table-column prop="createDate" label="上传时间" width="200" show-overflow-tooltip align="center" />
+      <el-table-column prop="users" label="适合人群" width="120" show-overflow-tooltip align="center" />
+      <el-table-column prop="auditStatus" label="审核状态" width="100" align="center">
+        <template #="{ row }">
+          <span v-if="row.auditStatus == 202001">审核未通过</span>
+          <span v-else-if="row.auditStatus == 202002">未提交审核</span>
+          <span v-else-if="row.auditStatus == 202003">已提交审核</span>
+          <span v-else>审核通过</span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="status" label="发布状态" width="100" align="center">
+        <template #="{ row }">
+          <span v-if="row.status == 203001">未发布</span>
+          <span v-else-if="row.status == 203002">已发布</span>
+          <span v-else>下线</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
         <template #="{ row }">
           <img :src="row.pic" alt="" class="table-avatar">
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="200">
+      <el-table-column label="课程审批" width="140" align="center">
+        <template #="{ row }">
+          <el-popconfirm title="确认发布吗?" @confirm="publishCourse(row.id)">
+            <template #reference>
+              <el-button type="success" size="small" icon="Check" title="发布课程"></el-button>
+            </template>
+          </el-popconfirm>
+          <el-popconfirm title="确认驳回吗?" @confirm="rejectCourse(row.id)">
+            <template #reference>
+              <el-button type="danger" size="small" icon="Close" title="驳回课程"></el-button>
+            </template>
+          </el-popconfirm>
+        </template>
+      </el-table-column>
+      <el-table-column label="基本操作" width="180" align="center">
         <template #="{ row }">
           <el-button type="primary" size="small" @click="editCourse(row.id)" icon="Edit" title="修改课程信息"></el-button>
           <el-button type="primary" size="small" @click="searchCourse(row.id)" icon="Search" title="查看课程信息"></el-button>
+
           <el-popconfirm title="确认删除吗?" @confirm="removeCourse(row.id)">
             <template #reference>
               <el-button type="danger" size="small" icon="Delete" title="删除课程"></el-button>
             </template>
           </el-popconfirm>
+
         </template>
       </el-table-column>
     </el-table>
-
 
     <!-- 分页器 -->
     <div class="demo-pagination-block" style="margin: 10px 0">
@@ -142,18 +171,18 @@
 </template>
 
 <script setup lang="ts">
-import { nextTick, onMounted, reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { Picture as IconPicture } from "@element-plus/icons-vue";
 // 获取课程相关接口
 import {
   reqCourseList,
   reqGetCourseById,
   reqGetTreeNodeCourse,
-  reqGetTreeNodeCourseById,
   reqGetCourseBySt,
   reqAddNewCourse,
   reqRemoveCourse,
-  reqEditCourse
+  reqEditCourse,
+  reqPublishCourse
 } from "@/api/course";
 // 引入教师相关接口
 import { reqGetTeacherList } from "@/api/teacher";
@@ -376,6 +405,18 @@ const uploadPic = async (param: any) => {
   // 上传后从远程服务器要文件地址进行赋值
   newCourse.value.pic = result.data
 
+}
+
+// 确认发布课程按钮回调
+const publishCourse = async (id: number) => {
+  await reqPublishCourse(id, '202004')
+  getCourses()
+}
+
+// 确认驳回课程按钮回调
+const rejectCourse = async (id: number) => {
+  await reqPublishCourse(id, '202001')
+  getCourses()
 }
 
 

@@ -34,6 +34,14 @@
 			<span>课程管理</span>
 		</el-menu-item>
 
+		<!-- 课程审核 -->
+		<el-menu-item index="/admin/coursecheck">
+			<el-icon>
+				<CircleCheck />
+			</el-icon>
+			<span>课程审核</span>
+		</el-menu-item>
+
 		<!-- 用户管理 -->
 		<el-menu-item index="/admin/user">
 			<el-icon>

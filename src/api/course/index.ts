@@ -18,7 +18,11 @@ enum API {
 	// 删除课程接口
 	REMOVECOURSE_URL = '/course/delete/',
 	// 修改课程接口
-	EDITCOURSE_URL = '/course/update'
+	EDITCOURSE_URL = '/course/update',
+	// 课程审核接口
+	PUBLISHCOURSE_URL = '/publish/audit',
+	// 提交审核接口
+	UPLOADCOURSE_URL = '/publish/commit/'
 
 }
 
@@ -51,3 +55,9 @@ export const reqRemoveCourse = (id: number) => request.delete<any, any>(API.REMO
 
 // 修改课程方法
 export const reqEditCourse = (editCourseDto: any) => request.put<any, any>(API.EDITCOURSE_URL, editCourseDto)
+
+// 课程发布方法
+export const reqPublishCourse = (id: number, status: string) => request.post<any, any>(API.PUBLISHCOURSE_URL + `?courseId=${id}&status=${status}`)
+
+// 提交课程审核方法
+export const reqUploadCourse = (id: number) => request.post<any, any>(API.UPLOADCOURSE_URL + `${id}`)
