@@ -1,7 +1,9 @@
 <template>
 	<!-- 左侧菜单组件 -->
 	<el-menu router active-text-color="#ffd04b" background-color="$base-menu-background" class="el-menu-vertical-demo"
-		:default-active="$route.path" text-color="#fff">
+		:default-active="$route.path" text-color="#fff" :collapse="LayoutSettingStore.fold">
+		<!-- LOGO部分 -->
+		<logo></logo>
 		<!-- 首页 -->
 		<el-menu-item index="/admin/home">
 			<el-icon>
@@ -53,7 +55,13 @@
 </template>
     
 <script setup lang='ts'>
+import logo from '../Logo/index.vue'
 import { useRoute } from 'vue-router';
+
+// 获取Layout相关的配置仓库
+import useLayOutSettingStore from '@/store/setting'
+let LayoutSettingStore = useLayOutSettingStore();
+
 let $route = useRoute()
 
 
@@ -62,5 +70,6 @@ let $route = useRoute()
 <style scoped lang="scss">
 .el-menu {
 	border: none;
+	
 }
 </style>
