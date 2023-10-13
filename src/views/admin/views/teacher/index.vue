@@ -295,7 +295,7 @@ const onSubmit = async () => {
 
 	// 发起添加教师请求
 	let result = await reqAddTeacher(newTeacher.value)
-	if (result.code == 1) {
+	if (result.code == 200) {
 		ElMessage.success("添加成功")
 	} else {
 		ElMessage.error("添加失败")

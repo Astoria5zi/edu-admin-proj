@@ -9,7 +9,7 @@ enum API {
     // 增加教师接口
     ADDTEACHER_URL = "/user/save",
     // 根据教师id获得信息接口
-    GETTEACHERBYID = "/teacher/",
+    GETTEACHERBYID = "/teacher/get/",
     // 修改教师信息接口
     EDITTEACHER = "/teacher/update",
     // 根据name获取教师信息

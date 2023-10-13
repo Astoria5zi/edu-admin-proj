@@ -20,7 +20,7 @@
 			<el-table-column prop="utype" label="用户类型" width="150" align="center">
 				<template #="{ row }">
 					<span v-if="row.utype == 101003">管理员</span>
-					<span v-else-if="row.utype == 101002">用户</span>
+					<span v-else-if="row.utype == 101002">老师</span>
 					<span v-else>学生</span>
 				</template>
 			</el-table-column>
@@ -72,7 +72,7 @@
 			</el-form-item>
 			<el-form-item label="用户性别：">
 				<el-radio-group v-model="newUsers.sex">
-					<el-radio label="1">男</el-radio>
+					<el-radio label="1" >男</el-radio>
 					<el-radio label="0">女</el-radio>
 				</el-radio-group>
 			</el-form-item>
