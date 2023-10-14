@@ -132,7 +132,7 @@ import { ElMessage } from 'element-plus'
 // 当前页码
 let pageNo = ref(1)
 // 页码大小
-let pageSize = ref(5)
+let pageSize = ref(10)
 // 教师总数量
 let total = ref(0)
 // 是否点击添加教师

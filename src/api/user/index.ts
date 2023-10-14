@@ -1,6 +1,5 @@
 // 用户相关接口
 import request from "@/utils/request"
-import { use } from "video.js/dist/types/tech/middleware"
 // 课程用户相关的请求地址
 enum API {
     // 获取课程列表接口
@@ -16,7 +15,9 @@ enum API {
     // 按id查询用户
     GETUSERBYID_URL = '/user/',
     // 更改用户状态接口
-    CHANGESTATUS_URL = '/user/status/'
+    CHANGESTATUS_URL = '/user/status/',
+    // 通过姓名查找用户信息
+    GETUSERBYNAME_URL = '/user/find?'
 }
 
 // 获取所有课程信息方法
@@ -46,3 +47,12 @@ export const reqGetUserById = (id: any) => request.get<any, any>(API.GETUSERBYID
 
 // 更改用户状态方法
 export const reqChangeUserStatus = (id: number, status: string) => request.post<any, any>(API.CHANGESTATUS_URL + `${status}?id=${id}`)
+
+// 通过姓名获取用户信息 + 分页查询方法
+export const reqGetUserByName = (name: string, pageNo?: number, pageSize?: number) => {
+	if (!pageNo && !pageSize) {
+		return request.post<any, any>(API.GETUSERBYNAME_URL + `name=${name}`)
+	} else {
+		return request.post<any, any>(API.GETUSERBYNAME_URL + `name=${name}&pageNo=${pageNo}&pageSize=${pageSize}`)
+	}
+}

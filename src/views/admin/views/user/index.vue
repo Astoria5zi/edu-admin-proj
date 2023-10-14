@@ -151,7 +151,7 @@ import { ElMessage } from 'element-plus'
 // 当前页码
 let pageNo = ref(1)
 // 页码大小
-let pageSize = ref(5)
+let pageSize = ref(10)
 // 用户总数量
 let total = ref(0)
 // 是否点击添加用户
@@ -167,7 +167,6 @@ let newUsers = ref({
 	"birthday": "2023-10-12T07:17:03.632Z",
 	"cellphone": "",
 	"email": "",
-	"id": 0,
 	"name": "",
 	"nickname": "",
 	"qq": "",
@@ -192,7 +191,6 @@ let userInfo = ref({
 	"userpic": "",
 	"utype": ""
 })
-
 
 // 定义标志判断是修改还是新增
 let editFlag = ref(false)
@@ -258,7 +256,7 @@ const editUser = async (id: number) => {
 	// 跳转到表单页面
 	isAdd.value = true
 	// 用户信息添加到表单
-	Object.assign(newUsers.value, result)
+	Object.assign(newUsers.value, result.data)
 }
 
 // 确认修改按钮回调
@@ -341,7 +339,7 @@ const uploadPic = async (param: any) => {
 // 查询用户详情回调
 const searchUser = async (id: number) => {
 	let result = await reqGetUserById(id)
-	userInfo.value = result
+	userInfo.value = result.data
 	userInfoFlag.value = true
 }
 

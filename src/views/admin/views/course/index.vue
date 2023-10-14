@@ -84,17 +84,18 @@
 
   <!-- 添加课程界面 -->
   <div v-if="isAdd" class="add-container">
-    <el-form :model="newCourse" ref="form" label-width="120px" :inline="false" style="max-width: 460px">
-      <el-form-item label="课程名称：">
+    <el-form ref="ruleFormRef" :model="newCourse" label-width="120px" :inline="false" style="max-width: 460px"
+      :rules="rules">
+      <el-form-item label="课程名称：" prop="name">
         <el-input v-model="newCourse.name"></el-input>
       </el-form-item>
-      <el-form-item label="当前定价：">
+      <el-form-item label="当前定价：" prop="price">
         <el-input v-model="newCourse.price"></el-input>
       </el-form-item>
-      <el-form-item label="起始价格：">
+      <el-form-item label="起始价格：" prop="originalPrice">
         <el-input v-model="newCourse.originalPrice"></el-input>
       </el-form-item>
-      <el-form-item label="课程分类：">
+      <el-form-item label="课程分类：" prop="st">
         <el-cascader v-model="newCourse.st" :options="treeNodeCourseArr" @change="chooseSt" :props="cascaderProps">
           <template #default="{ node, data }">
             <span>{{ data.label }}</span>
@@ -102,7 +103,7 @@
           </template>
         </el-cascader>
       </el-form-item>
-      <el-form-item label="授课教师：">
+      <el-form-item label="授课教师：" prop="teacherId">
         <el-select v-model="newCourse.teacherId" placeholder="请选择">
           <el-option v-for="item in teachersIdArr" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
@@ -126,7 +127,7 @@
       </el-form-item>
       <el-form-item>
         <el-button v-if="idEdit" type="primary" @click="onEdit">修改课程</el-button>
-        <el-button v-else type="primary" @click="onSubmit">添加课程</el-button>
+        <el-button v-else type="primary" @click="onSubmit(ruleFormRef)">添加课程</el-button>
         <el-button @click="btnCancel">取消</el-button>
       </el-form-item>
     </el-form>
@@ -188,14 +189,13 @@ import {
 import { reqGetTeacherList } from "@/api/teacher";
 // 获取上传文件接口
 import { reqUploadFile } from '@/api/common'
-// 引入课程接口类型
-// 引入接口类型
-// import { AddcourseResponse } from '@/api/course/type'
+// 引入表单校验格式
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 
 // 当前页码
 let pageNo = ref(1);
 // 页码大小
-let pageSize = ref(5);
+let pageSize = ref(10);
 // 课程总数量
 let total = ref(0);
 // 是否点击添加课程
@@ -226,9 +226,9 @@ let courseInfo = reactive({
 let newCourse = ref({
 
   "charge": "201001", // 000免费 001收费
-  "price": '1',
-  "originalPrice": '1',
-  "validDays": 365,
+  "price": '',
+  "originalPrice": '',
+  "validDays": '',
   "mt": "",
   "st": "",
   "name": "",
@@ -239,6 +239,25 @@ let newCourse = ref({
   "stName": "",
   "teacherId": "",
   "teacherName": ""
+});
+// 绑定表单校验对象
+const ruleFormRef = ref<FormInstance>()
+// 表单校验规则
+const rules = reactive({
+  charge: [{ required: true, message: '请选择收费类型', trigger: 'blur' }],
+  price: [{ required: true, message: '请输入价格', trigger: 'blur' }],
+  originalPrice: [{ required: true, message: '请输入原价', trigger: 'blur' }],
+  validDays: [{ required: true, message: '请输入有效期', trigger: 'blur' }],
+  mt: [{ required: true, message: '请输入MT', trigger: 'blur' }],
+  st: [{ required: true, message: '请输入ST', trigger: 'blur' }],
+  name: [{ required: true, message: '请输入课程名称', trigger: 'blur' }],
+  pic: [{ required: true, message: '请输入图片地址', trigger: 'blur' }],
+  users: [{ required: true, message: '请输入用户类型', trigger: 'blur' }],
+  description: [{ required: true, message: '请输入课程描述', trigger: 'blur' }],
+  mtName: [{ required: true, message: '请输入MT名称', trigger: 'blur' }],
+  stName: [{ required: true, message: '请输入ST名称', trigger: 'blur' }],
+  teacherId: [{ required: true, message: '请输入教师ID', trigger: 'blur' }],
+  teacherName: [{ required: true, message: '请输入教师姓名', trigger: 'blur' }]
 });
 // 树状课程数组
 let treeNodeCourseArr = ref([]);
@@ -326,15 +345,23 @@ const btnAddCourse = () => {
 }
 
 // 确认添加按钮回调
-const onSubmit = async () => {
-  // 返回课程列表
-  isAdd.value = false;
-  // 发起添加教师请求
-  await reqAddNewCourse(newCourse.value);
+const onSubmit = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate((valid, fields) => {
+    if (valid) {
+      // 返回课程列表
+      isAdd.value = false;
+      // 成功提醒
+      ElMessage.success("添加成功")
+      // 发起添加教师请求
+      reqAddNewCourse(newCourse.value);
+      getCourses();
 
-  // 数组大小发生变化 这样还是会触发totalchange钩子
-  // total.value = coursesArr.value.length
-  getCourses();
+    } else {
+      console.log('error submit!', fields)
+    }
+  })
+
 };
 
 // 列表页面级联选择器绑定值变化触发回调
