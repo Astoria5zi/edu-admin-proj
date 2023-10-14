@@ -2,8 +2,8 @@
 	<!-- 展示教师列表以及操作 -->
 	<div v-if="!isAdd" class="teacher-table">
 		<!-- 搜索框 -->
-		<el-input  placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;"
-			v-model="keyWords" clearable @clear="handleClear"/>
+		<el-input placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" clearable
+			@clear="handleClear" />
 		<!-- 教师查询按钮 -->
 		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询</el-button>
 		<!-- 添加教师按钮 -->
@@ -22,10 +22,8 @@
 			</el-table-column>
 			<el-table-column label="操作" width="200" align="center">
 				<template #="{ row }">
-					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit"
-						title="修改教师"></el-button>
-					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search"
-						title="查看教师详情"></el-button>
+					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit" title="修改教师"></el-button>
+					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search" title="查看教师详情"></el-button>
 					<el-popconfirm title="确认删除吗?" @confirm="removeTeacher(row.id)">
 						<template #reference>
 							<el-button type="danger" size="small" icon="Delete" title="删除教师"></el-button>
@@ -37,24 +35,25 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
-				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
+				@current-change="handleCurrentChange" />
 		</div>
 	</div>
 
 	<!-- 添加教师界面 -->
 	<div v-if="isAdd" class="add-container">
-		<el-form :model="newTeacher" ref="form" label-width="120px" :inline="false" style="max-width: 460px">
-			<el-form-item label="教师姓名：">
+		<el-form :model="newTeacher" ref="ruleFormRef" label-width="120px" :inline="false" style="max-width: 460px"
+			:rules="rules">
+			<el-form-item label="教师姓名：" prop="username">
 				<el-input v-model="newTeacher.username"></el-input>
 			</el-form-item>
-			<el-form-item label="教师职称：">
+			<el-form-item label="教师职称：" prop="resume">
 				<el-select placeholder="please select your level" v-model="newTeacher.resume">
 					<el-option v-for="item in resumeOption" :key="item.value" :label="item.lable" :value="item.value">
 					</el-option>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="教师性别：">
+			<el-form-item label="教师性别：" prop="sex">
 				<el-radio-group v-model="newTeacher.sex">
 					<el-radio label="1">男</el-radio>
 					<el-radio label="0">女</el-radio>
@@ -74,7 +73,7 @@
 			</el-form-item>
 			<el-form-item>
 				<el-button v-if="editFlag" type="primary" @click="onEdit">修改</el-button>
-				<el-button v-else type="primary" @click="onSubmit">新增</el-button>
+				<el-button v-else type="primary" @click="onSubmit(ruleFormRef)">新增</el-button>
 				<el-button @click="cancel">取消</el-button>
 			</el-form-item>
 		</el-form>
@@ -122,14 +121,14 @@
 
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
-import { computed, onMounted, ref } from 'vue';
+import { reactive, onMounted, ref } from 'vue';
 // 获取教师相关接口
 import { reqGetTeacherList, reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
 // 获取上传文件接口
 import { reqUploadFile } from '@/api/common'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import type { UploadProps } from 'element-plus'
-import { ElMessage } from 'element-plus'
+import { ElMessage, type FormInstance } from 'element-plus'
 
 // 当前页码
 let pageNo = ref(1)
@@ -171,17 +170,23 @@ let teacherInfo = ref({
 	"resume": '',
 	"userpic": ''
 })
-
 // 是否正在按条件查询标志
 let isConditonFlag = ref(false)
 // 定义标志判断是修改还是新增
 let editFlag = ref(false)
+// 绑定表单校验对象
+const ruleFormRef = ref<FormInstance>()
+// 表单校验规则
+const rules = reactive({
+	resume: [{ required: true, message: '请选择教师职称类型', trigger: 'blur' }],
+	name: [{ required: true, message: '请输入用户姓名', trigger: 'blur' }],
+	username: [{ required: true, message: '请输入教师名称名', trigger: 'blur' }],
+	sex: [{ required: true, message: '请选择教师性别', trigger: 'blur' }],
+});
 
 // 封装获取教师信息方法
 const getTeachers = async () => {
 	let result = await reqGetTeacherList(pageNo.value, pageSize.value)
-
-
 	teachersArr.value = result.items
 	total.value = result.counts
 }
@@ -287,25 +292,26 @@ const addTeacherBtn = () => {
 }
 
 // 确认添加按钮回调
-const onSubmit = async () => {
+const onSubmit = async (formEl: FormInstance | undefined) => {
+	if (!formEl) return
+	await formEl.validate((valid, fields) => {
+		if (valid) {
+			// 为啥后端接口里同一个意思要整两个字段啊aaaaaaa
+			newTeacher.value.name = newTeacher.value.username
+			newTeacher.value.userpic = newTeacher.value.pic
+			// 返回课程列表
+			isAdd.value = false;
+			// 成功提醒
+			ElMessage.success("添加成功")
+			// 发起添加用户请求
+			reqAddTeacher(newTeacher.value);
+			getTeachers();
+			isAdd.value = false
+		} else {
+			console.log('error submit!', fields)
+		}
+	})
 
-	// 为啥后端接口里同一个意思要整两个字段啊aaaaaaa
-	newTeacher.value.name = newTeacher.value.username
-	newTeacher.value.userpic = newTeacher.value.pic
-
-	// 发起添加教师请求
-	let result = await reqAddTeacher(newTeacher.value)
-	if (result.code == 200) {
-		ElMessage.success("添加成功")
-	} else {
-		ElMessage.error("添加失败")
-	}
-	// 清空教师对象
-	clearObj()
-	// 重新获取教师列表
-	getTeachers()
-	// 返回教师列表
-	isAdd.value = false
 }
 
 // 上传教师图片两个钩子

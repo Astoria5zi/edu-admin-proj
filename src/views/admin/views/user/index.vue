@@ -61,20 +61,21 @@
 
 	<!-- 添加用户界面 -->
 	<div v-if="isAdd" class="add-container">
-		<el-form :model="newUsers" ref="form" label-width="120px" :inline="false" style="max-width: 460px">
-			<el-form-item label="姓名：">
+		<el-form :model="newUsers" ref="ruleFormRef" label-width="120px" :inline="false"
+			style="max-width: 460px;margin-left: 20px;" label-position="top" :rules="rules">
+			<el-form-item label="姓名：" prop="name">
 				<el-input v-model="newUsers.name"></el-input>
 			</el-form-item>
-			<el-form-item label="用户名：">
+			<el-form-item label="用户名：" prop="username">
 				<el-input v-model="newUsers.username"></el-input>
 			</el-form-item>
-			<el-form-item label="用户类型：">
+			<el-form-item label="用户类型：" prop="utype">
 				<el-select placeholder="请选择用户类型" v-model="newUsers.utype">
 					<el-option v-for="item in characterOption" :key="item.value" :label="item.lable" :value="item.value">
 					</el-option>
 				</el-select>
 			</el-form-item>
-			<el-form-item label="用户性别：">
+			<el-form-item label="用户性别：" prop="sex">
 				<el-radio-group v-model="newUsers.sex">
 					<el-radio label="1">男</el-radio>
 					<el-radio label="0">女</el-radio>
@@ -94,7 +95,7 @@
 			</el-form-item>
 			<el-form-item>
 				<el-button v-if="editFlag" type="primary" @click="onEdit">修改</el-button>
-				<el-button v-else type="primary" @click="onSubmit">新增</el-button>
+				<el-button v-else type="primary" @click="onSubmit(ruleFormRef)">新增</el-button>
 				<el-button @click="cancel">取消</el-button>
 			</el-form-item>
 		</el-form>
@@ -143,14 +144,14 @@
 
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 // 获取用户相关接口
 import { reqGetUserList, reqAddUser, reqRemoveUser, reqEditUser, reqGetUserById, reqChangeUserStatus, reqGetUserByName } from '@/api/user';
 // 获取上传文件接口
 import { reqUploadFile } from '@/api/common'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import type { UploadProps } from 'element-plus'
-import { ElMessage } from 'element-plus'
+import { ElMessage, type FormInstance } from 'element-plus'
 
 // 当前页码
 let pageNo = ref(1)
@@ -198,6 +199,15 @@ let userInfo = ref({
 let editFlag = ref(false)
 // 是否正在按条件查询标志
 let isConditonFlag = ref(false)
+// 绑定表单校验对象
+const ruleFormRef = ref<FormInstance>()
+// 表单校验规则
+const rules = reactive({
+	utype: [{ required: true, message: '请选择用户类型', trigger: 'blur' }],
+	name: [{ required: true, message: '请输入用户姓名', trigger: 'blur' }],
+	username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+	sex: [{ required: true, message: '请选择用户性别', trigger: 'blur' }],
+});
 
 // 封装获取用户信息方法
 const getUsers = async () => {
@@ -211,7 +221,6 @@ const clearObj = () => {
 		"birthday": "2023-10-12T07:17:03.632Z",
 		"cellphone": "",
 		"email": "",
-		"id": 0,
 		"name": "",
 		"nickname": "",
 		"qq": "",
@@ -307,21 +316,25 @@ const addUserBtn = () => {
 }
 
 // 确认添加按钮回调
-const onSubmit = async () => {
+const onSubmit = async (formEl: FormInstance | undefined) => {
+	if (!formEl) return
+	await formEl.validate((valid, fields) => {
+		if (valid) {
+			// 返回课程列表
+			isAdd.value = false;
+			// 成功提醒
+			ElMessage.success("添加成功")
+			// 发起添加用户请求
+			reqAddUser(newUsers.value);
+			getUsers();
+			isAdd.value = false
+		} else {
+			console.log('error submit!', fields)
+		}
+	})
 
-	// 发起添加用户请求
-	let result = await reqAddUser(newUsers.value)
-	if (result.code == 200) {
-		ElMessage.success("添加成功")
-	} else {
-		ElMessage.error("添加失败")
-	}
-	// 清空用户对象
-	clearObj()
-	// 重新获取用户列表
-	getUsers()
-	// 返回用户列表
-	isAdd.value = false
+
+
 }
 
 // 上传用户图片两个钩子

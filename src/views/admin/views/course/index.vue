@@ -294,7 +294,6 @@ onMounted(async () => {
 
 });
 
-
 // 删除按钮回调
 const removeCourse = async (id: number) => {
   // 发起删除请求
