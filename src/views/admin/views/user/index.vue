@@ -2,7 +2,10 @@
 	<!-- 展示用户列表以及操作 -->
 	<div v-if="!isAdd" class="User-table">
 		<!-- 搜索框 -->
-		<el-input placeholder="输入用户姓名" :suffix-icon="Search" style="width: 200px ;" v-model="keyWords" />
+		<el-input placeholder="输入用户姓名" clearable @clear="handleClear" :suffix-icon="Search" style="width: 200px ;"
+			v-model="keyWords" />
+		<!-- 课程查询按钮 -->
+		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询</el-button>
 		<!-- 添加用户按钮 -->
 		<el-button type="primary" size="default" @click="addUserBtn" style="margin: 10px;">添加用户</el-button>
 		<!-- 展示用户列表 -->
@@ -34,7 +37,8 @@
 			<el-table-column label="操作" width="220" align="center">
 				<template #="{ row }">
 					<el-button type="primary" size="small" @click="editUser(row.id)" icon="Edit" title="修改用户"></el-button>
-					<el-button type="primary" size="small" @click="searchUser(row.id)" icon="Search" title="查看用户详情"></el-button>
+					<el-button type="primary" size="small" @click="searchUser(row.id)" icon="Search"
+						title="查看用户详情"></el-button>
 					<el-popconfirm title="确认删除吗?" @confirm="removeUser(row.id)">
 						<template #reference>
 							<el-button type="danger" size="small" icon="Delete" title="删除用户"></el-button>
@@ -50,8 +54,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
-				@current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -72,7 +76,7 @@
 			</el-form-item>
 			<el-form-item label="用户性别：">
 				<el-radio-group v-model="newUsers.sex">
-					<el-radio label="1" >男</el-radio>
+					<el-radio label="1">男</el-radio>
 					<el-radio label="0">女</el-radio>
 				</el-radio-group>
 			</el-form-item>
@@ -141,7 +145,7 @@
 import { Search } from '@element-plus/icons-vue'
 import { onMounted, ref } from 'vue';
 // 获取用户相关接口
-import { reqGetUserList, reqAddUser, reqRemoveUser, reqEditUser, reqGetUserById, reqChangeUserStatus } from '@/api/user';
+import { reqGetUserList, reqAddUser, reqRemoveUser, reqEditUser, reqGetUserById, reqChangeUserStatus, reqGetUserByName } from '@/api/user';
 // 获取上传文件接口
 import { reqUploadFile } from '@/api/common'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
@@ -175,7 +179,6 @@ let newUsers = ref({
 	"userpic": "",
 	"utype": ""
 })
-
 // 用户角色配置选项（不这样做会出现修改用户职称时，lable不能改变的bug）
 const characterOption = [
 	{ value: '101001', lable: '学生' },
@@ -191,9 +194,10 @@ let userInfo = ref({
 	"userpic": "",
 	"utype": ""
 })
-
 // 定义标志判断是修改还是新增
 let editFlag = ref(false)
+// 是否正在按条件查询标志
+let isConditonFlag = ref(false)
 
 // 封装获取用户信息方法
 const getUsers = async () => {
@@ -236,15 +240,33 @@ const removeUser = async (id: number) => {
 }
 
 // 当前页面改变触发回调
-const handleCurrentChange = () => {
-	// 重新发请求获取用户信息
-	getUsers()
+const handleCurrentChange = async () => {
+
+	// 判断当前是否正在按条件查询
+	// 如果是，则调用按条件查询课程的接口
+	if (isConditonFlag.value) {
+		let result = await reqGetUserByName(keyWords.value, pageNo.value, pageSize.value)
+		usersArr.value = result.items
+	}
+	// 否则调用基本获取课程的接口
+	else {
+		getUsers();
+	}
+
 }
 
 // 页面大小改变触发回调
-const handleSizeChange = () => {
-	// 重新发请求获取用户信息
-	getUsers()
+const handleSizeChange = async () => {
+	// 判断当前是否正在按条件查询
+	// 如果是，则调用按条件查询课程的接口
+	if (isConditonFlag.value) {
+		let result = await reqGetUserByName(keyWords.value, pageNo.value, pageSize.value)
+		usersArr.value = result.items
+	}
+	// 否则调用基本获取课程的接口
+	else {
+		getUsers();
+	}
 }
 
 // 修改用户按钮回调
@@ -355,6 +377,26 @@ const changeUserStatus = async (id: number, status: string) => {
 	// 修改成功重新获取用户信息
 	getUsers()
 
+}
+
+// 点击查询按钮回调
+const btnInquire = async () => {
+	// 开启按条件查询课程标志
+	isConditonFlag.value = true
+	// 先获取当前条件下的课程总数
+	let result = await reqGetUserByName(keyWords.value)
+	total.value = result.items.length
+	// 然后发分页请求
+	pageNo.value = 1
+	result = await reqGetUserByName(keyWords.value, pageNo.value, pageSize.value)
+	usersArr.value = result.items
+}
+
+// 清空文本框触发回调
+const handleClear = async () => {
+	isConditonFlag.value = false
+	pageNo.value = 1
+	await getUsers();
 }
 
 

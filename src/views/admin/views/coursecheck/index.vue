@@ -89,8 +89,6 @@ let total = ref(0);
 let isAdd = ref(false);
 // 存储课程列表
 let coursesArr = ref([]);
-
-
 // 树状课程数组
 let treeNodeCourseArr = ref([]);
 // 级联选择器绑定值

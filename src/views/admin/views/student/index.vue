@@ -131,9 +131,9 @@
 
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
-import { computed, onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 // 获取学生相关接口
-import { reqGetTeacherList, reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
+import {  reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
 // 获取学生相关接口
 import { reqGetStudentList } from '@/api/student'
 // 获取上传文件接口
@@ -150,8 +150,6 @@ let pageSize = ref(10)
 let total = ref(0)
 // 是否点击添加学生
 let isAdd = ref(false)
-// 存储学生列表
-let teachersArr = ref([])
 // 存储学生列表
 let studentsArr = ref([])
 // 搜索框关键字

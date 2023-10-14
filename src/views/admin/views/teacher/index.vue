@@ -2,12 +2,14 @@
 	<!-- 展示教师列表以及操作 -->
 	<div v-if="!isAdd" class="teacher-table">
 		<!-- 搜索框 -->
-		<el-input @change="textChange" placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;"
-			v-model="keyWords" />
+		<el-input  placeholder="输入教师姓名" :suffix-icon="Search" style="width: 200px ;"
+			v-model="keyWords" clearable @clear="handleClear"/>
+		<!-- 教师查询按钮 -->
+		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询</el-button>
 		<!-- 添加教师按钮 -->
 		<el-button type="primary" size="default" @click="addTeacherBtn" style="margin: 10px;">添加教师</el-button>
 		<!-- 展示教师列表 -->
-		<el-table :data="computedTeachersArr" border style="width: 100%" max-height="75vh " :show-overflow-tooltip="true">
+		<el-table :data="teachersArr" border style="width: 100%" max-height="75vh " :show-overflow-tooltip="true">
 			<el-table-column label="序号" type="index" algin="center" width="150" align="center"></el-table-column>
 			<el-table-column prop="id" label="编号" width="150" align="center" />
 			<el-table-column prop="name" label="姓名" width="150" align="center" />
@@ -120,7 +122,7 @@
 
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 // 获取教师相关接口
 import { reqGetTeacherList, reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
 // 获取上传文件接口
@@ -169,13 +171,9 @@ let teacherInfo = ref({
 	"resume": '',
 	"userpic": ''
 })
-// 计算属性教师列表
-const computedTeachersArr = computed(() => {
-	return teachersArr.value.filter((item: any) => {
-		return item.name.includes(keyWords.value)
-	})
-})
 
+// 是否正在按条件查询标志
+let isConditonFlag = ref(false)
 // 定义标志判断是修改还是新增
 let editFlag = ref(false)
 
@@ -219,15 +217,31 @@ const removeTeacher = async (id: number) => {
 }
 
 // 当前页面改变触发回调
-const handleCurrentChange = () => {
-	// 重新发请求获取教师信息
-	getTeachers()
+const handleCurrentChange = async () => {
+	// 判断当前是否正在按条件查询
+	// 如果是，则调用按条件查询课程的接口
+	if (isConditonFlag.value) {
+		let result = await reqGetTeacherByName(keyWords.value, pageNo.value, pageSize.value)
+		teachersArr.value = result.items
+	}
+	// 否则调用基本获取课程的接口
+	else {
+		getTeachers();
+	}
 }
 
 // 页面大小改变触发回调
-const handleSizeChange = () => {
-	// 重新发请求获取教师信息
-	getTeachers()
+const handleSizeChange = async () => {
+	// 判断当前是否正在按条件查询
+	// 如果是，则调用按条件查询课程的接口
+	if (isConditonFlag.value) {
+		let result = await reqGetTeacherByName(keyWords.value, pageNo.value, pageSize.value)
+		teachersArr.value = result.items
+	}
+	// 否则调用基本获取课程的接口
+	else {
+		getTeachers();
+	}
 }
 
 // 修改教师按钮回调
@@ -264,20 +278,6 @@ const onEdit = async () => {
 	editFlag.value = false
 	// 返回表格界面
 	isAdd.value = false
-}
-
-// 查询文本框发生变化（有bug，未解决）
-const textChange = async () => {
-	// // 文本框有值
-	// if (keyWords.value) {
-	// 	let result = await reqGetTeacherByName(keyWords.value)
-	// 	teachersArr.value = result
-	// 	total.value = result.length
-	// }
-	// // 文本框为空，重新获取课程列表
-	// else {
-	// 	getTeachers()
-	// }
 }
 
 // 添加教师按钮回调
@@ -355,6 +355,26 @@ const searchTeacher = async (id: number) => {
 const cancel = () => {
 	isAdd.value = false
 	clearObj()
+}
+
+// 点击查询按钮回调
+const btnInquire = async () => {
+	// 开启按条件查询课程标志
+	isConditonFlag.value = true
+	// 先获取当前条件下的课程总数
+	let result = await reqGetTeacherByName(keyWords.value, pageNo.value, pageSize.value)
+	total.value = result.items.length
+	// 然后发分页请求
+	pageNo.value = 1
+	result = await reqGetTeacherByName(keyWords.value, pageNo.value, pageSize.value)
+	teachersArr.value = result.items
+}
+
+// 清空文本框触发回调
+const handleClear = async () => {
+	isConditonFlag.value = false
+	pageNo.value = 1
+	await getTeachers();
 }
 
 

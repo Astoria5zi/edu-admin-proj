@@ -13,7 +13,7 @@ enum API {
     // 修改教师信息接口
     EDITTEACHER = "/teacher/update",
     // 根据name获取教师信息
-    GETTEARCHERBYNAME = "/teacher/find/"
+    GETTEARCHERBYNAME_URL = "/teacher/get/name?"
 }
 
 // 获取所有教师信息请求
@@ -40,4 +40,10 @@ export const reqGetTeacherByID = (id: number) => request.get<any, any>(API.GETTE
 export const reqEditTeacher = (data: any) => request.put<any, any>(API.EDITTEACHER, data)
 
 // 根据name获取教师信息
-export const reqGetTeacherByName = (name: string) => request.get<any, any>(API.GETTEARCHERBYNAME + `${name}`)
+export const reqGetTeacherByName = (name: string, pageNo?: number, pageSize?: number) => {
+    if (!pageNo && !pageSize) {
+        return request.post<any, any>(API.GETTEARCHERBYNAME_URL + `name=${name}`)
+    } else {
+        return request.post<any, any>(API.GETTEARCHERBYNAME_URL + `name=${name}&pageNo=${pageNo}&pageSize=${pageSize}`)
+    }
+}
