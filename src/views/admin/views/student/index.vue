@@ -189,9 +189,9 @@ let editFlag = ref(false)
 // 封装获取学生信息方法
 const getUsers = async () => {
 	let result = await reqGetStudentList(pageNo.value, pageSize.value)
-	studentsArr.value = result.items
+	studentsArr.value = result.data.items
 
-	total.value = result.counts
+	total.value = result.data.counts
 }
 // 封装一个清空对象属性值方法
 const clearObj = () => {

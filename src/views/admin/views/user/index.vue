@@ -27,7 +27,12 @@
 					<span v-else>学生</span>
 				</template>
 			</el-table-column>
-			<el-table-column prop="status" label="用户状态" width="100" align="center" />
+			<el-table-column prop="status" label="用户状态" width="100" align="center" >
+				<template #="{ row }">
+					<span v-if="row.status == 1">启用</span>
+					<span v-else>禁用</span>
+				</template>
+			</el-table-column>
 			<el-table-column prop="createTime" label="注册时间" align="center" />
 			<el-table-column prop="pic" label="用户照片" width="150" align="center">
 				<template #="{ row }">
@@ -37,15 +42,14 @@
 			<el-table-column label="操作" width="220" align="center">
 				<template #="{ row }">
 					<el-button type="primary" size="small" @click="editUser(row.id)" icon="Edit" title="修改用户"></el-button>
-					<el-button type="primary" size="small" @click="searchUser(row.id)" icon="Search"
-						title="查看用户详情"></el-button>
+					<el-button type="primary" size="small" @click="searchUser(row.id)" icon="Search" title="查看用户详情"></el-button>
 					<el-popconfirm title="确认删除吗?" @confirm="removeUser(row.id)">
 						<template #reference>
 							<el-button type="danger" size="small" icon="Delete" title="删除用户"></el-button>
 						</template>
 					</el-popconfirm>
-					<el-button v-if="row.status == 1" type="info" size="small" @click="changeUserStatus(row.id, '0')"
-						icon="TurnOff" title="禁用用户"></el-button>
+					<el-button v-if="row.status == 1" type="info" size="small" @click="changeUserStatus(row.id, '0')" icon="TurnOff"
+						title="禁用用户"></el-button>
 					<el-button v-else type="success" size="small" @click="changeUserStatus(row.id, '1')" icon="Open"
 						title="启用用户"></el-button>
 				</template>
@@ -54,8 +58,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
-				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
+				@current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -212,8 +216,8 @@ const rules = reactive({
 // 封装获取用户信息方法
 const getUsers = async () => {
 	let result = await reqGetUserList(pageNo.value, pageSize.value)
-	usersArr.value = result.items
-	total.value = result.counts
+	usersArr.value = result.data.items
+	total.value = result.data.counts
 }
 // 封装一个清空对象属性值方法
 const clearObj = () => {
@@ -398,11 +402,11 @@ const btnInquire = async () => {
 	isConditonFlag.value = true
 	// 先获取当前条件下的课程总数
 	let result = await reqGetUserByName(keyWords.value)
-	total.value = result.items.length
+	total.value = result.data.counts
 	// 然后发分页请求
 	pageNo.value = 1
 	result = await reqGetUserByName(keyWords.value, pageNo.value, pageSize.value)
-	usersArr.value = result.items
+	usersArr.value = result.data.items
 }
 
 // 清空文本框触发回调

@@ -83,6 +83,13 @@ export const constantRoute = [
 					title: '学生管理',
 				},
 			},
+			// 管理中心 -- 学生管理
+			{
+				path: '/admin/stuselectcourse', component: () => import('@/views/admin/views/stuselectcourse/index.vue'), name: 'stuselectcourse',
+				meta: {
+					title: '学生选课',
+				},
+			},
 			// 管理中心 -- 教师管理
 			{
 				path: '/admin/teacher', component: () => import('@/views/admin/views/teacher/index.vue'), name: 'teacher',

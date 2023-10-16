@@ -7,6 +7,8 @@ enum API {
 
 	// 获取分页课程列表接口
 	COURSELIST_URL = "/course/list?",
+	// 获取分页课程列表接口（新的，更详细）
+	GETCOURSEINFOLIST_URL = '/course/courseInfoList?',
 	// 根据id查询课程详细信息
 	GETCOURSEBYID_URL = '/course/',
 	// 查询树状课程接口
@@ -23,11 +25,15 @@ enum API {
 	PUBLISHCOURSE_URL = '/publish/audit',
 	// 提交审核接口
 	UPLOADCOURSE_URL = '/publish/commit/'
+	
 
 }
 
 // 获取所有课程信息接口
 export const reqCourseList = (pageNo: number, pageSize: number, data: any) => request.post<any, any>(API.COURSELIST_URL + `pageNo=${pageNo}&pageSize=${pageSize}`, data)
+
+// 获取所有课程信息接口（新的，更详细）
+export const reqGetCourseInfoList = (pageNo: number, pageSize: number) => request.post<any, any>(API.GETCOURSEINFOLIST_URL + `pageNo=${pageNo}&pageSize=${pageSize}`)
 
 // 根据id获取课程相关信息
 export const reqGetCourseById = (id: number) => request.get<any, any>(API.GETCOURSEBYID_URL + `${id}`)

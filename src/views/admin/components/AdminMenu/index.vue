@@ -20,6 +20,14 @@
 			<span>学生管理</span>
 		</el-menu-item>
 
+		<!-- 学生选课 -->
+		<el-menu-item index="/admin/stuselectcourse">
+			<el-icon>
+				<User />
+			</el-icon>
+			<span>学生选课</span>
+		</el-menu-item>
+
 		<!-- 教师管理 -->
 		<el-menu-item index="/admin/teacher">
 			<el-icon>
@@ -70,6 +78,6 @@ let $route = useRoute()
 <style scoped lang="scss">
 .el-menu {
 	border: none;
-	
+
 }
 </style>

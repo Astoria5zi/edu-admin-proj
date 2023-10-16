@@ -187,8 +187,8 @@ const rules = reactive({
 // 封装获取教师信息方法
 const getTeachers = async () => {
 	let result = await reqGetTeacherList(pageNo.value, pageSize.value)
-	teachersArr.value = result.items
-	total.value = result.counts
+	teachersArr.value = result.data.items
+	total.value = result.data.counts
 }
 // 封装一个清空对象属性值方法
 const clearObj = () => {
@@ -369,11 +369,11 @@ const btnInquire = async () => {
 	isConditonFlag.value = true
 	// 先获取当前条件下的课程总数
 	let result = await reqGetTeacherByName(keyWords.value, pageNo.value, pageSize.value)
-	total.value = result.items.length
+	total.value = result.data.counts
 	// 然后发分页请求
 	pageNo.value = 1
 	result = await reqGetTeacherByName(keyWords.value, pageNo.value, pageSize.value)
-	teachersArr.value = result.items
+	teachersArr.value = result.data.items
 }
 
 // 清空文本框触发回调

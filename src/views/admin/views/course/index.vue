@@ -279,8 +279,8 @@ const getCourses = async () => {
     courseName: "",
   });
 
-  coursesArr.value = result.items;
-  total.value = result.counts;
+  coursesArr.value = result.data.items;
+  total.value = result.data.counts;
 };
 
 // 组件挂载时获课程师信息
@@ -379,11 +379,11 @@ const btnInquire = async () => {
   isConditonFlag.value = true
   // 先获取当前条件下的课程总数
   let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string)
-  total.value = result.items.length
+  total.value = result.data.counts
   // 然后发分页请求
   pageNo.value = 1
   result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-  coursesArr.value = result.items
+  coursesArr.value = result.data.items
 }
 
 // 新增课程中的级联选择器变化触发回调
