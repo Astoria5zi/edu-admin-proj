@@ -50,7 +50,7 @@
                 <template #="{ row }">
                     <el-popconfirm title="确认选课吗?" @confirm="chooseCourse(row.id)">
                         <template #reference>
-                            <el-button type="success" size="small" icon="CreditCard" title="购买"></el-button>
+                            <el-button type="success" size="small" icon="CreditCard" title="选课"></el-button>
                         </template>
                     </el-popconfirm>
                 </template>
@@ -186,7 +186,7 @@ const chooseCourse = async (id: number) => {
         ElMessage.success("选课成功")
         getCourses();
     } else {
-        ElMessage.error("选课失败" + result.errMessage)
+        ElMessage.error("选课失败" + result.msg)
     }
 
 }

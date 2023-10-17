@@ -118,6 +118,13 @@ export const constantRoute = [
 					title: '用户管理',
 				},
 			},
+			// 管理中心 -- 订单管理
+			{
+				path: '/admin/order', component: () => import('@/views/admin/views/order/index.vue'), name: 'order',
+				meta: {
+					title: '订单管理',
+				},
+			},
 		]
 	},
 ]

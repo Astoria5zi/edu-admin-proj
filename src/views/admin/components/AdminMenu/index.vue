@@ -59,6 +59,14 @@
 			</el-icon>
 			<span>用户管理</span>
 		</el-menu-item>
+
+		<!-- 用户管理 -->
+		<el-menu-item index="/admin/order">
+			<el-icon>
+				<ShoppingCart />
+			</el-icon>
+			<span>订单管理</span>
+		</el-menu-item>
 	</el-menu>
 </template>
     
