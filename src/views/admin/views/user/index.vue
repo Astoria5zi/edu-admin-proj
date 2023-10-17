@@ -34,9 +34,10 @@
 				</template>
 			</el-table-column>
 			<el-table-column prop="createTime" label="注册时间" align="center" />
-			<el-table-column prop="pic" label="用户照片" width="150" align="center">
+			<el-table-column prop="userpic" label="用户照片" width="150" align="center">
 				<template #="{ row }">
-					<img class="table-avatar" :src="row.userpic" alt="">
+					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效"  />
+					<span v-else>暂无课程图片</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="操作" width="220" align="center">

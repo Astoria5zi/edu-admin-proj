@@ -42,8 +42,9 @@
       </el-table-column>
       <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
         <template #="{ row }">
-          <img :src="row.pic" alt="" class="table-avatar">
-        </template>
+					<img v-if="row.pic" class="table-avatar" :src="row.pic" alt="图片地址失效"  />
+					<span v-else>暂无课程图片</span>
+				</template>
       </el-table-column>
       <el-table-column label="课程审批" width="140" align="center">
         <template #="{ row }">
@@ -290,7 +291,7 @@ onMounted(async () => {
   treeNodeCourseArr.value = await reqGetTreeNodeCourse();
   // 获取所有教师信息(用于新增课程时选择教师)
   let result = await reqGetTeacherList()
-  teachersIdArr.value = result.items.map((item: any) => ({ id: item.id, name: item.name }));
+  teachersIdArr.value = result.data.items.map((item: any) => ({ id: item.id, name: item.name }));
 
 });
 
@@ -346,14 +347,14 @@ const btnAddCourse = () => {
 // 确认添加按钮回调
 const onSubmit = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
-  await formEl.validate((valid, fields) => {
+  await formEl.validate(async (valid, fields) => {
     if (valid) {
       // 返回课程列表
       isAdd.value = false;
       // 成功提醒
       ElMessage.success("添加成功")
-      // 发起添加教师请求
-      reqAddNewCourse(newCourse.value);
+      // 发起添加课程请求
+      await reqAddNewCourse(newCourse.value);
       getCourses();
 
     } else {

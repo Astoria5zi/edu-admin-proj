@@ -28,13 +28,16 @@
 			</el-table-column>
 			<el-table-column prop="userpic" label="证件照" width="150" align="center">
 				<template #="{ row }">
-					<img class="table-avatar" :src="row.userpic" alt="">
+					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效"  />
+					<span v-else>暂无课程图片</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="操作" width="200" align="center">
 				<template #="{ row }">
-					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit" title="修改学生"></el-button>
-					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search" title="查看学生详情"></el-button>
+					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit"
+						title="修改学生"></el-button>
+					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search"
+						title="查看学生详情"></el-button>
 					<el-popconfirm title="确认删除吗?" @confirm="removeTeacher(row.id)">
 						<template #reference>
 							<el-button type="danger" size="small" icon="Delete" title="删除学生"></el-button>
@@ -46,8 +49,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
-				@current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -133,7 +136,7 @@
 import { Search } from '@element-plus/icons-vue'
 import { onMounted, ref } from 'vue';
 // 获取学生相关接口
-import {  reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
+import { reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
 // 获取学生相关接口
 import { reqGetStudentList } from '@/api/student'
 // 获取上传文件接口
@@ -362,6 +365,8 @@ const btnInquire = () => {
 .table-avatar {
 	height: 60px;
 	width: 60px;
+
+
 }
 
 

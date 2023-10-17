@@ -39,8 +39,9 @@
       </el-table-column>
       <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
         <template #="{ row }">
-          <img :src="row.pic" alt="" class="table-avatar">
-        </template>
+					<img v-if="row.pic" class="table-avatar" :src="row.pic" alt="图片地址失效"  />
+					<span v-else>暂无课程图片</span>
+				</template>
       </el-table-column>
       <el-table-column label="操作" width="120" align="center">
         <template #="{ row }">

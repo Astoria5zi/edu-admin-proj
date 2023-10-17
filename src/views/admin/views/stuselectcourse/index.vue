@@ -34,23 +34,27 @@
                 </template>
             </el-table-column>
             <el-table-column prop="users" label="适合人群" width="140" show-overflow-tooltip align="center" />
-            <el-table-column prop="validDays" label="有效期限" width="100" show-overflow-tooltip align="center" >
+            <el-table-column prop="validDays" label="有效期限" width="100" show-overflow-tooltip align="center">
                 <template #="{ row }">
                     <span v-if="row.validDays">{{ row.validDays }}</span>
                     <span v-else>长期有效</span>
                 </template>
             </el-table-column>
-            <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
+            <el-table-column :filters="[{ text: '未发布', value: '203001' }, { text: '已发布', value: '203002' },]"
+                prop="validDays" label="发布状态" width="100" show-overflow-tooltip align="center"
+                :filter-method="filterStatus">
                 <template #="{ row }">
-                    <img v-if="row.pic" :src="row.pic" alt="图片地址失效" class="table-avatar">
-                    <span v-else>暂无图片</span>
+                    <span v-if="row.status == 203001">未发布</span>
+                    <span v-else-if="row.status == 203002">已发布</span>
+                    <span v-else>下线</span>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="120" align="center">
                 <template #="{ row }">
                     <el-popconfirm title="确认选课吗?" @confirm="chooseCourse(row.id)">
                         <template #reference>
-                            <el-button type="success" size="small" icon="CreditCard" title="选课"></el-button>
+                            <el-button :disabled="row.status != 203002" type="success" size="small" icon="CreditCard"
+                                title="选课"></el-button>
                         </template>
                     </el-popconfirm>
                 </template>
@@ -189,6 +193,11 @@ const chooseCourse = async (id: number) => {
         ElMessage.error("选课失败" + result.msg)
     }
 
+}
+
+// 选择课程状态按钮
+const filterStatus = (value: string, row: any) => {
+    return row.status === value
 }
 
 

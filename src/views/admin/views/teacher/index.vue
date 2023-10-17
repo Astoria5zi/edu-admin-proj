@@ -17,7 +17,8 @@
 			<el-table-column prop="resume" label="职称" width="150" align="center" />
 			<el-table-column prop="pic" label="证件照" width="150" align="center">
 				<template #="{ row }">
-					<img class="table-avatar" :src="row.userpic" alt="">
+					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效"  />
+					<span v-else>暂无教师图片</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="操作" width="200" align="center">
