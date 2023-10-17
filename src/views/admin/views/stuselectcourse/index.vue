@@ -21,39 +21,34 @@
             <el-table-column prop="name" label="课程名称" width="180" align="center" />
             <el-table-column prop="teacherName" label="授课教师" width="100" align="center" />
             <el-table-column prop="description" label="课程简介" show-overflow-tooltip align="center" />
-
-            <el-table-column prop="price" label="价格(元)" width="100" show-overflow-tooltip align="center">
+            <el-table-column prop="price" label="现价(元)" width="120" show-overflow-tooltip align="center">
                 <template #="{ row }">
                     <span v-if="row.charge">{{ row.price }}</span>
                     <span v-else>免费</span>
                 </template>
             </el-table-column>
-            <el-table-column prop="users" label="适合人群" width="140" show-overflow-tooltip align="center" />
-            <el-table-column prop="auditStatus" label="审核状态" width="100" align="center">
+            <el-table-column prop="price" label="原始定价(元)" width="120" show-overflow-tooltip align="center">
                 <template #="{ row }">
-                    <span v-if="row.auditStatus == 202001">审核未通过</span>
-                    <span v-else-if="row.auditStatus == 202002">未提交审核</span>
-                    <span v-else-if="row.auditStatus == 202003">已提交审核</span>
-                    <span v-else>审核通过</span>
+                    <span v-if="row.charge">{{ row.originalPrice }}</span>
+                    <span v-else>免费</span>
                 </template>
             </el-table-column>
-            <el-table-column prop="status" label="发布状态" width="100" align="center">
+            <el-table-column prop="users" label="适合人群" width="140" show-overflow-tooltip align="center" />
+            <el-table-column prop="validDays" label="有效期限" width="100" show-overflow-tooltip align="center" >
                 <template #="{ row }">
-                    <span v-if="row.status == 203001">未发布</span>
-                    <span v-else-if="row.status == 203002">已发布</span>
-                    <span v-else>下线</span>
+                    <span v-if="row.validDays">{{ row.validDays }}</span>
+                    <span v-else>长期有效</span>
                 </template>
             </el-table-column>
             <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
-                <template #="{ row }">     
-                                   
+                <template #="{ row }">
                     <img v-if="row.pic" :src="row.pic" alt="图片地址失效" class="table-avatar">
                     <span v-else>暂无图片</span>
                 </template>
             </el-table-column>
             <el-table-column label="操作" width="120" align="center">
                 <template #="{ row }">
-                    <el-popconfirm title="确认提交审核吗?" @confirm="uploadCourse(row.id)">
+                    <el-popconfirm title="确认选课吗?" @confirm="chooseCourse(row.id)">
                         <template #reference>
                             <el-button type="success" size="small" icon="CreditCard" title="购买"></el-button>
                         </template>
@@ -87,6 +82,8 @@ import {
     reqEditCourse,
     reqUploadCourse
 } from "@/api/course";
+// 引入选课接口
+import { reqStuChooseCourse } from '@/api/stu_course'
 import { ElMessage } from "element-plus";
 
 
@@ -181,15 +178,15 @@ const btnInquire = async () => {
     coursesArr.value = result.data.items
 }
 
-// 提交按钮回调
-const uploadCourse = async (id: number) => {
-
-    let result = await reqUploadCourse(id)
+// 选课按钮回调
+const chooseCourse = async (id: number) => {
+    // 这里因为还没有学生端，所以都用42号学生来模拟发起选课请求
+    let result = await reqStuChooseCourse(id, 42)
     if (result.code == 200) {
-        ElMessage.success("提交审核成功")
+        ElMessage.success("选课成功")
         getCourses();
     } else {
-        ElMessage.error("提交审核失败")
+        ElMessage.error("选课失败" + result.errMessage)
     }
 
 }
