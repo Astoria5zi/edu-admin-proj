@@ -42,35 +42,39 @@
       </el-table-column>
       <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
         <template #="{ row }">
-					<img v-if="row.pic" class="table-avatar" :src="row.pic" alt="图片地址失效"  />
-					<span v-else>暂无课程图片</span>
-				</template>
+          <img v-if="row.pic" class="table-avatar" :src="row.pic" alt="图片地址失效" />
+          <span v-else>暂无课程图片</span>
+        </template>
       </el-table-column>
       <el-table-column label="课程审批" width="140" align="center">
+        <!-- 课程发布后不能再审核|发布|驳回 -->
+        <!-- 课程未提交审核也不能 发布|驳回-->
         <template #="{ row }">
           <el-popconfirm title="确认发布吗?" @confirm="publishCourse(row.id)">
             <template #reference>
-              <el-button type="success" size="small" icon="Check" title="发布课程"></el-button>
+              <el-button :disabled="row.status == 203002 || row.auditStatus == 202002" type="primary" size="small"
+                icon="Check" title="发布课程"></el-button>
             </template>
           </el-popconfirm>
           <el-popconfirm title="确认驳回吗?" @confirm="rejectCourse(row.id)">
             <template #reference>
-              <el-button type="danger" size="small" icon="Close" title="驳回课程"></el-button>
+              <el-button :disabled="row.status == 203002 || row.auditStatus == 202002" type="danger" size="small"
+                icon="Close" title="驳回课程"></el-button>
             </template>
           </el-popconfirm>
         </template>
       </el-table-column>
       <el-table-column label="基本操作" width="180" align="center">
+        <!-- 已发布|提交审核的课程不能修改和删除 -->
         <template #="{ row }">
-          <el-button type="primary" size="small" @click="editCourse(row.id)" icon="Edit" title="修改课程信息"></el-button>
+          <el-button :disabled="row.status == 203002 || row.auditStatus == 202003" type="primary" size="small"
+            @click="editCourse(row.id)" icon="Edit" title="修改课程信息"></el-button>
           <el-button type="primary" size="small" @click="searchCourse(row.id)" icon="Search" title="查看课程信息"></el-button>
-
           <el-popconfirm title="确认删除吗?" @confirm="removeCourse(row.id)">
             <template #reference>
-              <el-button type="danger" size="small" icon="Delete" title="删除课程"></el-button>
+              <el-button :disabled="row.status == 203002 || row.auditStatus == 202003" type="danger" size="small" icon="Delete" title="删除课程"></el-button>
             </template>
           </el-popconfirm>
-
         </template>
       </el-table-column>
     </el-table>
@@ -106,7 +110,7 @@
       </el-form-item>
       <el-form-item label="授课教师：" prop="teacherId">
         <el-select v-model="newCourse.teacherId" placeholder="请选择">
-          <el-option v-for="item in teachersIdArr" :key="item.id" :label="item.name" :value="item.id" />
+          <el-option v-for=" item  in  teachersIdArr " :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
       <el-form-item label="有效日期：">
@@ -308,7 +312,7 @@ const handleCurrentChange = async () => {
   // 如果是，则调用按条件查询课程的接口
   if (isConditonFlag.value) {
     let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-    coursesArr.value = result.items
+    coursesArr.value = result.data.items
   }
   // 否则调用基本获取课程的接口
   else {
@@ -322,7 +326,7 @@ const handleSizeChange = async () => {
   // 如果是，则调用按条件查询课程的接口
   if (isConditonFlag.value) {
     let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-    coursesArr.value = result.items
+    coursesArr.value = result.data.items
   }
   // 否则调用基本获取课程的接口
   else {
@@ -436,8 +440,14 @@ const uploadPic = async (param: any) => {
 
 // 确认发布课程按钮回调
 const publishCourse = async (id: number) => {
-  await reqPublishCourse(id, '202004')
-  getCourses()
+  let result = await reqPublishCourse(id, '202004')
+  if(result.code == 200){
+    ElMessage.success("发布成功")
+    getCourses()
+  }else{
+    ElMessage.error("发布失败")
+  }
+  
 }
 
 // 确认驳回课程按钮回调

@@ -39,15 +39,17 @@
       </el-table-column>
       <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
         <template #="{ row }">
-					<img v-if="row.pic" class="table-avatar" :src="row.pic" alt="图片地址失效"  />
-					<span v-else>暂无课程图片</span>
-				</template>
+          <img v-if="row.pic" class="table-avatar" :src="row.pic" alt="图片地址失效" />
+          <span v-else>暂无课程图片</span>
+        </template>
       </el-table-column>
       <el-table-column label="操作" width="120" align="center">
+        <!-- 已发布和已审核的不能再提交 -->
         <template #="{ row }">
           <el-popconfirm title="确认提交审核吗?" @confirm="uploadCourse(row.id)">
             <template #reference>
-              <el-button type="success" size="small" icon="Upload" title="提交审核"></el-button>
+              <el-button :disabled="row.status == 203002 || row.auditStatus == 202003" type="primary" size="small"
+                icon="Upload" title="提交审核"></el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -128,7 +130,7 @@ const handleCurrentChange = async () => {
   // 如果是，则调用按条件查询课程的接口
   if (isConditonFlag.value) {
     let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-    coursesArr.value = result.items
+    coursesArr.value = result.data.items
   }
   // 否则调用基本获取课程的接口
   else {
@@ -142,7 +144,7 @@ const handleSizeChange = async () => {
   // 如果是，则调用按条件查询课程的接口
   if (isConditonFlag.value) {
     let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-    coursesArr.value = result.items
+    coursesArr.value = result.data.items
   }
   // 否则调用基本获取课程的接口
   else {
@@ -176,7 +178,7 @@ const btnInquire = async () => {
 
 // 提交按钮回调
 const uploadCourse = async (id: number) => {
-  
+
   let result = await reqUploadCourse(id)
   if (result.code == 200) {
     ElMessage.success("提交审核成功")
