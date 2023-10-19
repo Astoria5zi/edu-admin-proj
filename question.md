@@ -119,9 +119,9 @@
      >>> vue2,3写法
      - ``` ::v-deep thead .el-table__cell{ 自定义样式 }  ```	
      >>> vue3写法
-     - ``` ::v-deep(thead .el-table__cell) { 自定义样式 }  ```	
-  
+     - ``` ::v-deep(thead .el-table__cell) { 自定义样式 }  ```	  
    - 自带属性：``` <el-tabel :header-cell-style="{ background: '#eef1f6' }> ```
+2. 发现BUG：修改用户失败返回的json数据没有状态码
 
 
 

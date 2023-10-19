@@ -65,14 +65,15 @@
         </template>
       </el-table-column>
       <el-table-column label="基本操作" width="180" align="center">
-        <!-- 已发布|提交审核的课程不能修改和删除 -->
+        <!-- 已发布|提交审核|审核通过的课程不能修改和删除 -->
         <template #="{ row }">
           <el-button :disabled="row.status == 203002 || row.auditStatus == 202003" type="primary" size="small"
             @click="editCourse(row.id)" icon="Edit" title="修改课程信息"></el-button>
           <el-button type="primary" size="small" @click="searchCourse(row.id)" icon="Search" title="查看课程信息"></el-button>
           <el-popconfirm title="确认删除吗?" @confirm="removeCourse(row.id)">
             <template #reference>
-              <el-button :disabled="row.status == 203002 || row.auditStatus == 202003" type="danger" size="small" icon="Delete" title="删除课程"></el-button>
+              <el-button :disabled="row.status == 203002 || row.auditStatus == 202003 || row.auditStatus == 202001"
+                type="danger" size="small" icon="Delete" title="删除课程"></el-button>
             </template>
           </el-popconfirm>
         </template>
@@ -131,7 +132,7 @@
         </el-upload>
       </el-form-item>
       <el-form-item>
-        <el-button v-if="idEdit" type="primary" @click="onEdit">修改课程</el-button>
+        <el-button v-if="idEdit" type="primary" @click="onEdit(ruleFormRef)">修改课程</el-button>
         <el-button v-else type="primary" @click="onSubmit(ruleFormRef)">添加课程</el-button>
         <el-button @click="btnCancel">取消</el-button>
       </el-form-item>
@@ -196,6 +197,7 @@ import { reqGetTeacherList } from "@/api/teacher";
 import { reqUploadFile } from '@/api/common'
 // 引入表单校验格式
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { el } from "element-plus/es/locale";
 
 // 当前页码
 let pageNo = ref(1);
@@ -302,7 +304,12 @@ onMounted(async () => {
 // 删除按钮回调
 const removeCourse = async (id: number) => {
   // 发起删除请求
-  await reqRemoveCourse(id)
+  let result = await reqRemoveCourse(id)
+  if (result.code == 200) {
+    ElMessage.success("删除成功")
+  } else {
+    ElMessage.error("删除失败：" + result.msg)
+  }
   await getCourses()
 };
 
@@ -362,6 +369,7 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
       getCourses();
 
     } else {
+      ElMessage.error("请完善表单")
       console.log('error submit!', fields)
     }
   })
@@ -407,13 +415,25 @@ const editCourse = async (id: number) => {
 }
 
 // 确定修改按钮回调
-const onEdit = async () => {
-  await reqEditCourse(newCourse.value)
-  getCourses()
-  // 关闭表单页面
-  isAdd.value = false
-  // 擦除修改标识
-  idEdit.value = false
+const onEdit = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  await formEl.validate(async (valid, fields) => {
+    if (valid) {
+      await reqEditCourse(newCourse.value)
+      getCourses()
+      // 成功提醒
+      ElMessage.success("修改成功")
+      // 关闭表单页面
+      isAdd.value = false
+      // 擦除修改标识
+      idEdit.value = false
+    } else {
+      ElMessage.error("请完善表单")
+      console.log('error submit!', fields)
+    }
+  })
+
+
 }
 
 // 新增/修改界面的取消按钮
@@ -441,13 +461,13 @@ const uploadPic = async (param: any) => {
 // 确认发布课程按钮回调
 const publishCourse = async (id: number) => {
   let result = await reqPublishCourse(id, '202004')
-  if(result.code == 200){
+  if (result.code == 200) {
     ElMessage.success("发布成功")
     getCourses()
-  }else{
+  } else {
     ElMessage.error("发布失败")
   }
-  
+
 }
 
 // 确认驳回课程按钮回调
@@ -487,12 +507,14 @@ const rejectCourse = async (id: number) => {
     height: 70%;
   }
 }
+
 .el-table {
-	::v-deep(thead .el-table__cell) {
-		background-color: rgb(64, 158, 255);
-		color: #eee;
-	}
+  ::v-deep(thead .el-table__cell) {
+    background-color: rgb(64, 158, 255);
+    color: #eee;
+  }
 }
+
 .avatar-uploader .avatar {
   min-width: 178px;
   height: 178px;

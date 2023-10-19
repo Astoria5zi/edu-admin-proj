@@ -17,14 +17,16 @@
 			<el-table-column prop="resume" label="职称" width="150" align="center" />
 			<el-table-column prop="pic" label="证件照" width="150" align="center">
 				<template #="{ row }">
-					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效"  />
+					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效" />
 					<span v-else>暂无教师图片</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="操作" width="200" align="center">
 				<template #="{ row }">
-					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit" title="修改教师"></el-button>
-					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search" title="查看教师详情"></el-button>
+					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit"
+						title="修改教师"></el-button>
+					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search"
+						title="查看教师详情"></el-button>
 					<el-popconfirm title="确认删除吗?" @confirm="removeTeacher(row.id)">
 						<template #reference>
 							<el-button type="danger" size="small" icon="Delete" title="删除教师"></el-button>
@@ -36,8 +38,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
-				@current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -73,7 +75,7 @@
 				</el-upload>
 			</el-form-item>
 			<el-form-item>
-				<el-button v-if="editFlag" type="primary" @click="onEdit">修改</el-button>
+				<el-button v-if="editFlag" type="primary" @click="onEdit(ruleFormRef)">修改</el-button>
 				<el-button v-else type="primary" @click="onSubmit(ruleFormRef)">新增</el-button>
 				<el-button @click="cancel">取消</el-button>
 			</el-form-item>
@@ -215,7 +217,7 @@ onMounted(() => {
 const removeTeacher = async (id: number) => {
 	// 调用删除接口
 	let result = await reqDeleteTeacher(id)
-	if (result.code == 1) {
+	if (result.code == 200) {
 		ElMessage.success("删除成功")
 	}
 	// 重新获取教师信息
@@ -265,25 +267,32 @@ const editTeacher = async (id: number) => {
 }
 
 // 确认修改按钮回调
-const onEdit = async () => {
-	// 真不是我想这样写，接口那里一个名字有name和username两个字段，人都被搞混了，反正现在这样能正常用
-	newTeacher.value.name = newTeacher.value.username
-	// 发起修改请求
-	let result = await reqEditTeacher(newTeacher.value)
-
-	if (result.code == 1) {
-		ElMessage.success("修改成功")
-	} else {
-		ElMessage.error("添加失败")
-	}
-	// 清空教师对象
-	clearObj()
-	// 修改成功重新获取教师信息
-	getTeachers()
-	// 关闭修改标志
-	editFlag.value = false
-	// 返回表格界面
-	isAdd.value = false
+const onEdit = async (formEl: FormInstance | undefined) => {
+	if (!formEl) return
+	await formEl.validate(async (valid, fields) => {
+		if (valid) {
+			// 真不是我想这样写，接口那里一个名字有name和username两个字段，人都被搞混了，反正现在这样能正常用
+			newTeacher.value.name = newTeacher.value.username
+			// 发起修改请求
+			let result = await reqEditTeacher(newTeacher.value)
+			if (result.code == 200) {
+				ElMessage.success("修改成功")
+			} else {
+				ElMessage.error("修改失败")
+			}
+			// 清空教师对象
+			clearObj()
+			// 修改成功重新获取教师信息
+			getTeachers()
+			// 关闭修改标志
+			editFlag.value = false
+			// 返回表格界面
+			isAdd.value = false
+		} else {
+			ElMessage.error("请完善表单")
+			console.log('error submit!', fields)
+		}
+	})
 }
 
 // 添加教师按钮回调
@@ -309,6 +318,7 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
 			getTeachers();
 			isAdd.value = false
 		} else {
+			ElMessage.error("请完善表单")
 			console.log('error submit!', fields)
 		}
 	})

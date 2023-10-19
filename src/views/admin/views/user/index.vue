@@ -27,7 +27,7 @@
 					<span v-else>学生</span>
 				</template>
 			</el-table-column>
-			<el-table-column prop="status" label="用户状态" width="100" align="center" >
+			<el-table-column prop="status" label="用户状态" width="100" align="center">
 				<template #="{ row }">
 					<span v-if="row.status == 1">启用</span>
 					<span v-else>禁用</span>
@@ -36,21 +36,22 @@
 			<el-table-column prop="createTime" label="注册时间" align="center" />
 			<el-table-column prop="userpic" label="用户照片" width="150" align="center">
 				<template #="{ row }">
-					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效"  />
+					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效" />
 					<span v-else>暂无课程图片</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="操作" width="220" align="center">
 				<template #="{ row }">
 					<el-button type="primary" size="small" @click="editUser(row.id)" icon="Edit" title="修改用户"></el-button>
-					<el-button type="primary" size="small" @click="searchUser(row.id)" icon="Search" title="查看用户详情"></el-button>
+					<el-button type="primary" size="small" @click="searchUser(row.id)" icon="Search"
+						title="查看用户详情"></el-button>
 					<el-popconfirm title="确认删除吗?" @confirm="removeUser(row.id)">
 						<template #reference>
 							<el-button type="danger" size="small" icon="Delete" title="删除用户"></el-button>
 						</template>
 					</el-popconfirm>
-					<el-button v-if="row.status == 1" type="info" size="small" @click="changeUserStatus(row.id, '0')" icon="TurnOff"
-						title="禁用用户"></el-button>
+					<el-button v-if="row.status == 1" type="info" size="small" @click="changeUserStatus(row.id, '0')"
+						icon="TurnOff" title="禁用用户"></el-button>
 					<el-button v-else type="success" size="small" @click="changeUserStatus(row.id, '1')" icon="Open"
 						title="启用用户"></el-button>
 				</template>
@@ -59,8 +60,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
-				@current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -99,7 +100,7 @@
 				</el-upload>
 			</el-form-item>
 			<el-form-item>
-				<el-button v-if="editFlag" type="primary" @click="onEdit">修改</el-button>
+				<el-button v-if="editFlag" type="primary" @click="onEdit(ruleFormRef)">修改</el-button>
 				<el-button v-else type="primary" @click="onSubmit(ruleFormRef)">新增</el-button>
 				<el-button @click="cancel">取消</el-button>
 			</el-form-item>
@@ -296,22 +297,31 @@ const editUser = async (id: number) => {
 }
 
 // 确认修改按钮回调
-const onEdit = async () => {
-	// 发起修改请求
-	let result = await reqEditUser(newUsers.value)
-	if (result.code == 200) {
-		ElMessage.success("修改成功")
-	} else {
-		ElMessage.error("修改失败")
-	}
-	// 清空用户对象
-	clearObj()
-	// 修改成功重新获取用户信息
-	getUsers()
-	// 关闭修改标志
-	editFlag.value = false
-	// 返回表格界面
-	isAdd.value = false
+const onEdit = async (formEl: FormInstance | undefined) => {
+	if (!formEl) return
+	await formEl.validate(async (valid, fields) => {
+		if (valid) {
+			// 发起修改请求
+			let result = await reqEditUser(newUsers.value)
+			if (result.code == 200) {
+				ElMessage.success("修改成功")
+			} else {
+				ElMessage.error("修改失败")
+			}
+			// 清空用户对象
+			clearObj()
+			// 修改成功重新获取用户信息
+			getUsers()
+			// 关闭修改标志
+			editFlag.value = false
+			// 返回表格界面
+			isAdd.value = false
+		} else {
+			ElMessage.error("请完善表单")
+			console.log('error submit!', fields)
+		}
+	})
+
 }
 
 // 添加用户按钮回调
@@ -427,6 +437,7 @@ const handleClear = async () => {
 	height: 60px;
 	width: 60px;
 }
+
 .el-table {
 	::v-deep(thead .el-table__cell) {
 		background-color: rgb(64, 158, 255);
