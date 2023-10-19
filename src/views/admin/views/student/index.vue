@@ -8,7 +8,7 @@
 		<!-- 添加学生按钮 -->
 		<el-button type="primary" size="default" @click="addTeacherBtn" style="margin: 10px;">添加学生</el-button>
 		<!-- 展示学生列表 -->
-		<el-table :data="studentsArr" border style="width: 100%" max-height="75vh " :show-overflow-tooltip="true">
+		<el-table :data="studentsArr" border style="width: 100%" max-height="75vh " stripe :show-overflow-tooltip="true">
 			<el-table-column label="序号" type="index" algin="center" width="100" align="center"></el-table-column>
 			<el-table-column prop="id" label="编号" width="100" align="center" />
 			<el-table-column prop="name" label="姓名" width="150" align="center" />
@@ -28,7 +28,7 @@
 			</el-table-column>
 			<el-table-column prop="userpic" label="证件照" width="150" align="center">
 				<template #="{ row }">
-					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效"  />
+					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效" />
 					<span v-else>暂无课程图片</span>
 				</template>
 			</el-table-column>
@@ -369,6 +369,12 @@ const btnInquire = () => {
 
 }
 
+.el-table {
+	::v-deep(thead .el-table__cell) {
+		background-color: rgb(64, 158, 255);
+		color: #eee;
+	}
+}
 
 .teacherinfo {
 	position: absolute;

@@ -9,7 +9,7 @@
 		<!-- 添加用户按钮 -->
 		<el-button type="primary" size="default" @click="addUserBtn" style="margin: 10px;">添加用户</el-button>
 		<!-- 展示用户列表 -->
-		<el-table :data="usersArr" border style="width: 100%" max-height="75vh " :show-overflow-tooltip="true">
+		<el-table :data="usersArr" border style="width: 100%" max-height="75vh " stripe :show-overflow-tooltip="true">
 			<el-table-column label="序号" type="index" algin="center" width="80" align="center"></el-table-column>
 			<el-table-column prop="id" label="编号" width="80" align="center" />
 			<el-table-column prop="name" label="姓名" width="150" align="center" />
@@ -427,7 +427,12 @@ const handleClear = async () => {
 	height: 60px;
 	width: 60px;
 }
-
+.el-table {
+	::v-deep(thead .el-table__cell) {
+		background-color: rgb(64, 158, 255);
+		color: #eee;
+	}
+}
 
 .userInfo {
 	position: absolute;

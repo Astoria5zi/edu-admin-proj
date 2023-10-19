@@ -15,7 +15,7 @@
     <el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询</el-button>
 
     <!-- 展示课程列表 -->
-    <el-table :data="coursesArr" border style="width: 100%" max-height="700">
+    <el-table :data="coursesArr" border style="width: 100%" max-height="700" stripe>
       <el-table-column label="序号" type="index" algin="center" width="60" align="center"></el-table-column>
       <el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
       <el-table-column prop="name" label="课程名称" width="180" align="center" />
@@ -206,6 +206,13 @@ const uploadCourse = async (id: number) => {
   
   
 <style scoped lang="scss">
+
+.el-table {
+	::v-deep(thead .el-table__cell) {
+		background-color: rgb(64, 158, 255);
+		color: #eee;
+	}
+}
 .courseinfo {
   position: absolute;
   left: 50%; //起始是在body中，横向距左50%的位置

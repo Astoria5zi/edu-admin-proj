@@ -5,7 +5,11 @@
 		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询</el-button>
 
 		<!-- 展示课程列表 -->
-		<el-table :data="ordersArr" border style="width: 100%" max-height="700">
+
+		<!-- 自定义表头颜色方式1：elment自带的属性，传入配置对象就行 -->
+		<!-- <el-table :data="ordersArr" border style="width: 100%" max-height="700"
+			:header-cell-style="{ background: '#eef1f6' }"> -->
+		<el-table :data="ordersArr" border style="width: 100%" max-height="700" stripe >
 			<el-table-column label="序号" type="index" algin="center" width="60" align="center"></el-table-column>
 			<el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
 			<el-table-column prop="status" label="状态" width="100" align="center">
@@ -25,7 +29,11 @@
 			<el-table-column prop="createDate" label="下单时间" show-overflow-tooltip align="center" />
 			<el-table-column prop="payDate" label="支付时间" show-overflow-tooltip align="center" />
 			<el-table-column prop="totalPrice" label="订单金额(元)" width="140" align="center" />
-			<el-table-column prop="orderDescrip" label="订单备注" width="260" align="center" />
+			<el-table-column prop="orderDescrip" label="订单备注" width="260" align="center" style="padding: 0;">
+				<template #header>
+					<div>订单备注</div>
+				</template>
+			</el-table-column>
 			<el-table-column label="修改" width="120" align="center">
 				<template #="{ row }">
 					<el-button type="primary" size="small" icon="edit" title="修改"
@@ -63,8 +71,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
-				@current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
 		</div>
 
 	</div>
@@ -166,16 +174,6 @@ const handleSizeChange = async () => {
 
 };
 
-// 列表页面级联选择器绑定值变化触发回调
-const handleChange = async (value: any) => {
-	// 如果条件被清空，关闭按条件查询
-	if (!value) {
-		isConditonFlag.value = false
-		pageNo.value = 1
-		await getOrders();
-	}
-};
-
 // 点击查询按钮回调
 const btnInquire = async () => {
 	// 开启按条件查询课程标志
@@ -230,6 +228,14 @@ const btnDeleteHandler = async (orderId: number) => {
     
     
 <style scoped lang="scss">
+.el-table {
+	::v-deep(thead .el-table__cell) {
+		background-color: rgb(64, 158, 255);
+		color: #eee;
+	}
+}
+
+
 .courseinfo {
 	position: absolute;
 	left: 50%; //起始是在body中，横向距左50%的位置

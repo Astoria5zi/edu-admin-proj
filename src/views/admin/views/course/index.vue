@@ -18,7 +18,7 @@
     <el-button type="primary" size="default" @click="btnAddCourse">添加课程</el-button>
 
     <!-- 展示课程列表 -->
-    <el-table :data="coursesArr" border style="width: 100%" max-height="700">
+    <el-table :data="coursesArr" border style="width: 100%" max-height="700" stripe>
       <el-table-column label="序号" type="index" algin="center" width="60" align="center"></el-table-column>
       <el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
       <el-table-column prop="name" label="课程名称" width="180" align="center" />
@@ -487,7 +487,12 @@ const rejectCourse = async (id: number) => {
     height: 70%;
   }
 }
-
+.el-table {
+	::v-deep(thead .el-table__cell) {
+		background-color: rgb(64, 158, 255);
+		color: #eee;
+	}
+}
 .avatar-uploader .avatar {
   min-width: 178px;
   height: 178px;

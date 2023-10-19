@@ -110,5 +110,20 @@
 2. 完成订单管理查看和修改
 3. 完成订单删除功能
 4. 选课功能出现BUG,待修复(已修复)
+5. 完成部分按钮的约束条件
+6. 完成图片失效时，显示文字代替破损图片
+
+### 10.10
+1. 自定义el-table表头颜色
+   - 样式穿透
+     >>> vue2,3写法
+     - ``` ::v-deep thead .el-table__cell{ 自定义样式 }  ```	
+     >>> vue3写法
+     - ``` ::v-deep(thead .el-table__cell) { 自定义样式 }  ```	
+  
+   - 自带属性：``` <el-tabel :header-cell-style="{ background: '#eef1f6' }> ```
+
+
+
 
 
