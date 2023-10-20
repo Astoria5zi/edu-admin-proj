@@ -71,8 +71,14 @@ const handleResize = () => {
 }
 
 onMounted(() => {
-  
+  // 组件挂载后执行一次，用于初始化
+  handleResize();
+  window.addEventListener('resize', handleResize); // 添加窗口宽度变化的监听器
 })
+
+// 组件挂载后执行一次，用于初始化
+handleResize();
+window.addEventListener('resize', handleResize); // 添加窗口宽度变化的监听器
 
 </script>
 
