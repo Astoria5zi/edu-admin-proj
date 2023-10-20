@@ -12,7 +12,7 @@
           </div>
         </el-col>
         <el-col :span="12">
-          <el-form class="login_form" :model="userLoginDTO">
+          <el-form class="login_form" :model="userLoginDTO"  style="width: 420px"  label-width="200px">
             <el-form-item label="账号" prop="username">
               <el-input v-model="userLoginDTO.username"></el-input>
             </el-form-item>
@@ -104,7 +104,6 @@ const getTime = () => {
     .login_form {
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
       height: 45vh;
     }
