@@ -10,9 +10,9 @@
             <Banner></Banner>
             <!-- 课程卡片 -->
             <Card></Card>
-            <!-- <CourseCard></CourseCard>
             <CourseCard></CourseCard>
-            <CourseCard></CourseCard> -->
+            <CourseCard></CourseCard>
+            <CourseCard></CourseCard>
         </div>
 
         <!-- 底部导航 -->
@@ -23,7 +23,7 @@
 <script setup lang='ts'>
 // import Main from '@/layout/layout_main/index.vue'
 import Banner from '@/components/Banner/index.vue'
-// import CourseCard from '@/components/CourseCard/index.vue'
+import CourseCard from '@/components/CourseCard/index.vue'
 import Card from '@/components/card/index.vue'
 
 

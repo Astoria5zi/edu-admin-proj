@@ -16,8 +16,8 @@
 
       <div class="tab_right">
         <!-- 根据是否有TOKEN决定是否展示头像 -->
-        <el-menu-item index="/" v-if="userStore.token">
-          <el-avatar src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+        <el-menu-item index="/userpage" v-if="userStore.isLogin">
+          <el-avatar :src="userStore.userInfo.userpic" />
           <el-dropdown>
             <span class="el-dropdown-link">
               个人中心
@@ -27,30 +27,40 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>个人中心</el-dropdown-item>
+                <el-dropdown-item @click="unLogin">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
 
         </el-menu-item>
         <el-menu-item index="/login" v-else>登录 | 注册</el-menu-item>
-        <el-menu-item index="/userpage">个人中心</el-menu-item>
+        <!-- <el-menu-item index="/userpage">个人中心</el-menu-item> -->
       </div>
-
     </el-menu>
   </div>
   <el-divider style="margin: 0;margin-top: 5px;" />
 </template>
   
 <script setup lang='ts'>
+
 import { Search } from '@element-plus/icons-vue'
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+// 获取路由器
+let $router = useRouter()
 // 引入用户仓库
 import useUserStore from '@/store/user';
 let userStore = useUserStore()
 // 定义搜索框内容
 let text = ref()
 
+// 退出登录按钮回调
+const unLogin = async () => {
+  await userStore.userLogout()
+  // 跳转到主页
+  $router.push({ path: '/login' })
+
+}
 
 </script>
   

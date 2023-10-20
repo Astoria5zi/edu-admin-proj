@@ -2,8 +2,12 @@
 import request from "@/utils/request"
 // 课程用户相关的请求地址
 enum API {
-    // 获取课程列表接口
-    USERLOGIN_URL = "/user/login",
+    // 登录接口
+    USERLOGIN_URL = "/login/doLogin",
+    // 获取TOKEN值
+    GETUSERTOKEN_URL = '/login/tokenInfo',
+    // 退出登录
+    USERLOGOUT_URL = '/login/logout',
     // 分页获取用户信息
     GETUSERLIST_URL = '/user/list?',
     // 新增用户信息
@@ -22,6 +26,12 @@ enum API {
 
 // 获取所有课程信息方法
 export const reqUserLogin = (userLoginDTO: any) => request.post<any, any>(API.USERLOGIN_URL, userLoginDTO)
+
+// 获取TOKEN值方法
+export const reqGetToken = () => request.get<any, any>(API.GETUSERTOKEN_URL)
+
+// 退出登录方法
+export const reqLogout = () => request.get<any, any>(API.USERLOGOUT_URL)
 
 // 分页获取用户信息方法
 export const reqGetUserList = (pageNo: number, pageSize: number) => {
@@ -50,9 +60,9 @@ export const reqChangeUserStatus = (id: number, status: string) => request.post<
 
 // 通过姓名获取用户信息 + 分页查询方法
 export const reqGetUserByName = (name: string, pageNo?: number, pageSize?: number) => {
-	if (!pageNo && !pageSize) {
-		return request.post<any, any>(API.GETUSERBYNAME_URL + `name=${name}`)
-	} else {
-		return request.post<any, any>(API.GETUSERBYNAME_URL + `name=${name}&pageNo=${pageNo}&pageSize=${pageSize}`)
-	}
+    if (!pageNo && !pageSize) {
+        return request.post<any, any>(API.GETUSERBYNAME_URL + `name=${name}`)
+    } else {
+        return request.post<any, any>(API.GETUSERBYNAME_URL + `name=${name}&pageNo=${pageNo}&pageSize=${pageSize}`)
+    }
 }
