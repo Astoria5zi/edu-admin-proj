@@ -11,33 +11,28 @@
 		<el-table :data="studentsArr" border style="width: 100%" max-height="75vh " stripe :show-overflow-tooltip="true">
 			<el-table-column label="序号" type="index" algin="center" width="100" align="center"></el-table-column>
 			<el-table-column prop="id" label="编号" width="100" align="center" />
-			<el-table-column prop="name" label="姓名" width="150" align="center" />
-			<el-table-column prop="nickname" label="昵称" width="150" align="center" />
+			<el-table-column prop="name" label="姓名" width="120" align="center" />
+			<el-table-column prop="grade" label="年级" width="120" align="center" />
 			<el-table-column prop="sex" label="用户性别" width="100" align="center">
 				<template #="{ row }">
 					<span v-if="row.sex == 1">男</span>
 					<span v-else>女</span>
 				</template>
 			</el-table-column>
-			<el-table-column prop="createTime" label="注册时间" align="center" />
-			<el-table-column prop="status" label="状态" width="150" align="center">
-				<template #="{ row }">
-					<span v-if="row.status == 1">启用</span>
-					<span v-else>禁用</span>
-				</template>
+			<el-table-column prop="email" label="邮箱" align="center" width="280" />
+			<el-table-column prop="address" label="住址" align="center" />
+			<el-table-column prop="cellphone" label="电话号码" width="200" align="center">
 			</el-table-column>
 			<el-table-column prop="userpic" label="证件照" width="150" align="center">
 				<template #="{ row }">
 					<img v-if="row.userpic" class="table-avatar" :src="row.userpic" alt="图片地址失效" />
-					<span v-else>暂无课程图片</span>
+					<span v-else>暂无学生照片</span>
 				</template>
 			</el-table-column>
 			<el-table-column label="操作" width="200" align="center">
 				<template #="{ row }">
-					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit"
-						title="修改学生"></el-button>
-					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search"
-						title="查看学生详情"></el-button>
+					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit" title="修改学生"></el-button>
+					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search" title="查看学生详情"></el-button>
 					<el-popconfirm title="确认删除吗?" @confirm="removeTeacher(row.id)">
 						<template #reference>
 							<el-button type="danger" size="small" icon="Delete" title="删除学生"></el-button>
@@ -49,43 +44,47 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
-				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
+				@current-change="handleCurrentChange" />
 		</div>
 	</div>
 
 	<!-- 添加学生界面 -->
 	<div v-if="isAdd" class="add-container">
-		<el-form :model="newTeacher" ref="form" label-width="120px" :inline="false" style="max-width: 460px">
-			<el-form-item label="学生姓名：">
-				<el-input v-model="newTeacher.username"></el-input>
+		<el-form :model="newStudent" ref="ruleFormRef" label-width="120px" :inline="false" style="max-width: 460px"
+			:rules="rules">
+			<el-form-item label="学生姓名：" prop="name">
+				<el-input v-model="newStudent.name"></el-input>
 			</el-form-item>
-			<el-form-item label="学生职称：">
-				<el-select placeholder="please select your level" v-model="newTeacher.resume">
-					<el-option v-for="item in resumeOption" :key="item.value" :label="item.lable" :value="item.value">
-					</el-option>
-				</el-select>
+			<el-form-item label="学生电话：" prop="cellphone">
+				<el-input v-model="newStudent.cellphone"></el-input>
 			</el-form-item>
-			<el-form-item label="学生性别：">
-				<el-radio-group v-model="newTeacher.sex">
+			<el-form-item label="学生性别：" prop="sex">
+				<el-radio-group v-model="newStudent.sex">
 					<el-radio label="1">男</el-radio>
 					<el-radio label="0">女</el-radio>
 				</el-radio-group>
 			</el-form-item>
-			<el-form-item label="学生简介：">
-				<el-input type="textarea" v-model="newTeacher.intro" />
+			<el-form-item label="学生年级：">
+				<el-input v-model="newStudent.grade" />
+			</el-form-item>
+			<el-form-item label="学生邮箱：">
+				<el-input v-model="newStudent.email" />
+			</el-form-item>
+			<el-form-item label="学生住址：">
+				<el-input v-model="newStudent.address" />
 			</el-form-item>
 			<el-form-item label="学生照片：">
 				<el-upload class="avatar-uploader" :http-request="uploadPic" :show-file-list="false"
 					:on-success="handleAvatarSuccess" :before-upload="beforeAvatarUpload">
-					<img v-if="newTeacher.pic" class="avatar" :src="newTeacher.pic" />
+					<img v-if="newStudent.userpic" class="avatar" :src="newStudent.userpic" />
 					<el-icon v-else class="avatar-uploader-icon">
 						<Plus />
 					</el-icon>
 				</el-upload>
 			</el-form-item>
 			<el-form-item>
-				<el-button v-if="editFlag" type="primary" @click="onEdit">修改</el-button>
+				<el-button v-if="editFlag" type="primary" @click="onEdit(ruleFormRef)">修改</el-button>
 				<el-button v-else type="primary" @click="onSubmit">新增</el-button>
 				<el-button @click="cancel">取消</el-button>
 			</el-form-item>
@@ -94,30 +93,30 @@
 	</div>
 
 	<!-- 学生详细界面卡片 -->
-	<div class="teacherinfo" v-if="teacherInfoFlag" @click="teacherInfoFlag = false">
-		<el-card shadow="always" :body-style="{ padding: '20px' }" @click.stop="teacherInfoFlag = true">
+	<div class="studentInfo" v-if="studentInfoFlag" @click="studentInfoFlag = false">
+		<el-card shadow="always" :body-style="{ padding: '20px' }" @click.stop="studentInfoFlag = true">
 			<template #header>
 				<div class="card-header">
 					<span>学生详情</span>
 				</div>
 			</template>
-			<el-form :model="teacherInfo" ref="form" label-width="100px" :inline="false" style="max-width: 460px"
+			<el-form :model="studentInfo" ref="form" label-width="100px" :inline="false" style="max-width: 460px"
 				label-position="left">
 				<el-form-item label="学生名称：">
-					<el-input v-model="teacherInfo.name"></el-input>
+					<el-input v-model="studentInfo.name"></el-input>
 				</el-form-item>
 				<el-form-item label="学生编号：">
-					<el-input v-model="teacherInfo.id"></el-input>
+					<el-input v-model="studentInfo.grade"></el-input>
 				</el-form-item>
-				<el-form-item label="学生简介：">
-					<el-input type="textarea" v-model="teacherInfo.intro"></el-input>
+				<el-form-item label="学生邮箱：">
+					<el-input v-model="studentInfo.email"></el-input>
 				</el-form-item>
-				<el-form-item label="学生职称：">
-					<el-input v-model="teacherInfo.resume"></el-input>
+				<el-form-item label="学生住址：">
+					<el-input v-model="studentInfo.address"></el-input>
 				</el-form-item>
 				<el-form-item label="学生照片：" class="demo-image__error">
 					<div class="block">
-						<el-image :src="teacherInfo.userpic">
+						<el-image :src="studentInfo.userpic">
 							<template #error>
 								<div class="image-slot">
 									<el-icon><icon-picture /></el-icon>
@@ -134,16 +133,16 @@
 
 <script setup lang="ts">
 import { Search } from '@element-plus/icons-vue'
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 // 获取学生相关接口
-import { reqDeleteTeacher, reqAddTeacher, reqGetTeacherByID, reqEditTeacher, reqGetTeacherByName } from '@/api/teacher'
+import { reqAddTeacher} from '@/api/teacher'
 // 获取学生相关接口
-import { reqGetStudentList } from '@/api/student'
+import { reqGetStudentList, reqDeleteStudent, reqUpdateStudent, reqGetStudentInfoById } from '@/api/student'
 // 获取上传文件接口
 import { reqUploadFile } from '@/api/common'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
-import type { UploadProps } from 'element-plus'
-import { ElMessage } from 'element-plus'
+import type { UploadProps, } from 'element-plus'
+import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
 
 // 当前页码
 let pageNo = ref(1)
@@ -158,39 +157,42 @@ let studentsArr = ref([])
 // 搜索框关键字
 let keyWords = ref('')
 // 查询学生详细信息的标志
-let teacherInfoFlag = ref(false)
+let studentInfoFlag = ref(false)
 // 表单对象
-let newTeacher = ref({
-	utype: '101002', // 学生类型  必要
-	name: '',  // 必要
-	username: '',// 必要
-	sex: '',// 必要
-	intro: '',
-	resume: '',
-	pic: '',
-	userpic: ''
+let newStudent = ref({
+	"address": "",
+	"cellphone": "",
+	"grade": "",
+	"name": "",
+	"sex": "",
+	"userpic": "",
+	"email": "",
 
 })
-// 学生职称配置对象（不这样做会出现修改学生职称时，lable不能改变的bug）
-const resumeOption = [
-	{ value: '讲师', lable: '讲师' },
-	{ value: '副教授', lable: '副教授' },
-	{ value: '教授', lable: '教授' }
-]
+// 绑定表单校验对象
+const ruleFormRef = ref<FormInstance>()
 // 学生详细信息
-let teacherInfo = ref({
-	"id": '',
-	"name": "",
-	"intro": '',
-	"resume": '',
-	"userpic": ''
+let studentInfo = ref({
+	"address": "string",
+	"cellphone": "string",
+	"grade": "string",
+	"name": "string",
+	"sex": "string",
+	"userpic": "string",
+	"email": ""
+})
+// 表单校验规则
+const rules = reactive({
+	name: [{ required: true, message: "请输入学生姓名", trigger: 'blur' }],
+	sex: [{ required: true, message: "请选择学生性别", trigger: 'blur' }],
+	cellphone: [{ required: true, message: "请填写学生电话", trigger: 'blur' }],
 })
 
 // 定义标志判断是修改还是新增
 let editFlag = ref(false)
 
 // 封装获取学生信息方法
-const getUsers = async () => {
+const getStudents = async () => {
 	let result = await reqGetStudentList(pageNo.value, pageSize.value)
 	studentsArr.value = result.data.items
 
@@ -198,45 +200,46 @@ const getUsers = async () => {
 }
 // 封装一个清空对象属性值方法
 const clearObj = () => {
-	newTeacher.value = {
-		utype: '101002', // 学生类型  必要
-		name: '',  // 必要
-		username: '',// 必要
-		sex: '',// 必要
-		intro: '',
-		resume: '',
-		pic: '',
-		userpic: ''
+	newStudent.value = {
+		"address": "",
+		"cellphone": "",
+		"grade": "",
+		"name": "",
+		"sex": "",
+		"userpic": "",
+		"email": "",
 
 	}
 }
 // 组件挂载时获取学生信息
 onMounted(() => {
-	getUsers()
+	getStudents()
 
 })
 
 // 删除按钮回调
 const removeTeacher = async (id: number) => {
 	// 调用删除接口
-	let result = await reqDeleteTeacher(id)
-	if (result.code == 1) {
+	let result = await reqDeleteStudent(id)
+	if (result.code == 200) {
 		ElMessage.success("删除成功")
+		// 重新获取学生信息
+		getStudents()
 	}
-	// 重新获取学生信息
-	await getUsers()
+
+
 }
 
 // 当前页面改变触发回调
 const handleCurrentChange = () => {
 	// 重新发请求获取学生信息
-	getUsers()
+	getStudents()
 }
 
 // 页面大小改变触发回调
 const handleSizeChange = () => {
 	// 重新发请求获取学生信息
-	getUsers()
+	getStudents()
 }
 
 // 修改学生按钮回调
@@ -244,52 +247,67 @@ const editTeacher = async (id: number) => {
 	// 打开修改标志
 	editFlag.value = true
 	// 获取该id对应学生信息
-	let result = await reqGetTeacherByID(id)
-
+	let result = await reqGetStudentInfoById(id)
 	// 跳转到表单页面
 	isAdd.value = true
 	// 学生信息添加到表单
-	Object.assign(newTeacher.value, result)
-	newTeacher.value.username = newTeacher.value.name
+	Object.assign(newStudent.value, result)
 }
 
 // 确认修改按钮回调
-const onEdit = async () => {
-	// 真不是我想这样写，接口那里一个名字有name和username两个字段，人都被搞混了，反正现在这样能正常用
-	newTeacher.value.name = newTeacher.value.username
-	// 发起修改请求
-	let result = await reqEditTeacher(newTeacher.value)
+const onEdit = async (formEl: FormInstance | undefined) => {
+	if (!formEl) return
+	await formEl.validate(async (valid, fields) => {
+		if (valid) {
+			// 发起修改请求
+			let result = await reqUpdateStudent(newStudent.value)
+			if (result.code == 200) {
+				ElMessage.success("修改成功")
+			} else {
+				ElMessage.error("修改失败")
+			}
+			// 清空用户对象
+			clearObj()
+			// 修改成功重新获取学生信息
+			getStudents()
+			// 关闭修改标志
+			editFlag.value = false
+			// 返回表格界面
+			isAdd.value = false
+		} else {
+			ElMessage.error("请完善表单")
+			console.log('error submit!', fields)
+		}
+	})
 
-	if (result.code == 1) {
-		ElMessage.success("修改成功")
-	} else {
-		ElMessage.error("添加失败")
-	}
-	// 清空学生对象
-	clearObj()
-	// 修改成功重新获取学生信息
-	getUsers()
-	// 关闭修改标志
-	editFlag.value = false
-	// 返回表格界面
-	isAdd.value = false
+
+
 }
 
 // 添加学生按钮回调
 const addTeacherBtn = () => {
-	isAdd.value = true
-	editFlag.value = false
+	ElMessageBox.alert(`请使用"用户管理"添加功能进行学生添加`, '提示', {
+		// if you want to disable its autofocus
+		// autofocus: false,
+		confirmButtonText: '我知道了',
+		callback: () => {
+			ElMessage({
+				type: 'info',
+				message: `请前往用户管理进行添加`,
+			})
+		},
+	})
 }
 
 // 确认添加按钮回调
 const onSubmit = async () => {
 
 	// 为啥后端接口里同一个意思要整两个字段啊aaaaaaa
-	newTeacher.value.name = newTeacher.value.username
-	newTeacher.value.userpic = newTeacher.value.pic
+	newStudent.value.name = newStudent.value.username
+	newStudent.value.userpic = newStudent.value.pic
 
 	// 发起添加学生请求
-	let result = await reqAddTeacher(newTeacher.value)
+	let result = await reqAddTeacher(newStudent.value)
 	if (result.code == 200) {
 		ElMessage.success("添加成功")
 	} else {
@@ -298,7 +316,7 @@ const onSubmit = async () => {
 	// 清空学生对象
 	clearObj()
 	// 重新获取学生列表
-	getUsers()
+	getStudents()
 	// 返回学生列表
 	isAdd.value = false
 }
@@ -333,17 +351,14 @@ const uploadPic = async (param: any) => {
 	param.onSuccess(result.code, param.file)
 
 	// 上传后从远程服务器要文件地址进行赋值
-	newTeacher.value.userpic = result.data
-	newTeacher.value.pic = result.data
-
+	newStudent.value.userpic = result.data
 }
 
 // 查询学生详情回调
 const searchTeacher = async (id: number) => {
-	let result = await reqGetTeacherByID(id)
-	console.log(result);
-	teacherInfo.value = result
-	teacherInfoFlag.value = true
+	let result = await reqGetStudentInfoById(id)
+	studentInfo.value = result
+	studentInfoFlag.value = true
 }
 
 // 取消按钮回调
@@ -376,7 +391,7 @@ const btnInquire = () => {
 	}
 }
 
-.teacherinfo {
+.studentInfo {
 	position: absolute;
 	left: 50%; //起始是在body中，横向距左50%的位置
 	top: 50%; //起始是在body中，纵向距上50%的位置，这个点相当于body的中心点，div的左上角的定位

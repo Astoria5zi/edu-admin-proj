@@ -43,15 +43,14 @@
 			<el-table-column label="操作" width="220" align="center">
 				<template #="{ row }">
 					<el-button type="primary" size="small" @click="editUser(row.id)" icon="Edit" title="修改用户"></el-button>
-					<el-button type="primary" size="small" @click="searchUser(row.id)" icon="Search"
-						title="查看用户详情"></el-button>
+					<el-button type="primary" size="small" @click="searchUser(row.id)" icon="Search" title="查看用户详情"></el-button>
 					<el-popconfirm title="确认删除吗?" @confirm="removeUser(row.id)">
 						<template #reference>
 							<el-button type="danger" size="small" icon="Delete" title="删除用户"></el-button>
 						</template>
 					</el-popconfirm>
-					<el-button v-if="row.status == 1" type="info" size="small" @click="changeUserStatus(row.id, '0')"
-						icon="TurnOff" title="禁用用户"></el-button>
+					<el-button v-if="row.status == 1" type="info" size="small" @click="changeUserStatus(row.id, '0')" icon="TurnOff"
+						title="禁用用户"></el-button>
 					<el-button v-else type="success" size="small" @click="changeUserStatus(row.id, '1')" icon="Open"
 						title="启用用户"></el-button>
 				</template>
@@ -60,8 +59,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0;">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
-				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
+				@current-change="handleCurrentChange" />
 		</div>
 	</div>
 
@@ -175,7 +174,7 @@ let keyWords = ref('')
 let userInfoFlag = ref(false)
 // 表单对象
 let newUsers = ref({
-	"birthday": "2023-10-12T07:17:03.632Z",
+	"birthday": "",
 	"cellphone": "",
 	"email": "",
 	"name": "",
@@ -224,7 +223,7 @@ const getUsers = async () => {
 // 封装一个清空对象属性值方法
 const clearObj = () => {
 	newUsers.value = {
-		"birthday": "2023-10-12T07:17:03.632Z",
+		"birthday": "",
 		"cellphone": "",
 		"email": "",
 		"name": "",
@@ -333,14 +332,14 @@ const addUserBtn = () => {
 // 确认添加按钮回调
 const onSubmit = async (formEl: FormInstance | undefined) => {
 	if (!formEl) return
-	await formEl.validate((valid, fields) => {
+	await formEl.validate(async (valid, fields) => {
 		if (valid) {
 			// 返回课程列表
 			isAdd.value = false;
+			// 发起添加用户请求
+			await reqAddUser(newUsers.value);
 			// 成功提醒
 			ElMessage.success("添加成功")
-			// 发起添加用户请求
-			reqAddUser(newUsers.value);
 			getUsers();
 			isAdd.value = false
 		} else {
