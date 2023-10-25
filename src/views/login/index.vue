@@ -44,7 +44,7 @@ let $router = useRouter()
 
 
 // 账号密码数据
-let userLoginDTO = reactive({ password: '123456', username: '郭行骞' })
+let userLoginDTO = reactive({ password: '123456', username: '郭行骞2' })
 
 // 点击登录触发回调
 const login = async () => {

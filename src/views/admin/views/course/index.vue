@@ -40,7 +40,7 @@
           <span v-else>下线</span>
         </template>
       </el-table-column>
-      <el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
+      <el-table-column prop="pic" label="课程封面" width="120" align="center">
         <template #="{ row }">
           <img v-if="row.pic" class="table-avatar" :src="row.pic" alt="图片地址失效" />
           <span v-else>暂无课程图片</span>
@@ -362,10 +362,11 @@ const onSubmit = async (formEl: FormInstance | undefined) => {
     if (valid) {
       // 返回课程列表
       isAdd.value = false;
-      // 成功提醒
-      ElMessage.success("添加成功")
+
       // 发起添加课程请求
       await reqAddNewCourse(newCourse.value);
+      // 成功提醒
+      ElMessage.success("添加成功")
       getCourses();
 
     } else {

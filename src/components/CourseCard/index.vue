@@ -61,14 +61,16 @@ let widthPercent = ref(6)
 
 // 流媒体查询
 const handleResize = () => {
-  if (window.innerWidth <= 480) {
+  if (window.innerWidth <= 580) {
     widthPercent.value = 12; // 当宽度小于等于480px时，设置为50%
-  } else if (window.innerWidth <= 768) {
+  } else if (window.innerWidth <= 868) {
     widthPercent.value = 8; // 当宽度小于等于768px时，设置为75%
   } else {
     widthPercent.value = 6; // 默认设置为100%
   }
 }
+
+
 
 onMounted(() => {
   // 组件挂载后执行一次，用于初始化

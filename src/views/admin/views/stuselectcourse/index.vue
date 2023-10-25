@@ -184,14 +184,19 @@ const btnInquire = async () => {
 
 // 选课按钮回调
 const chooseCourse = async (id: number) => {
-    // 这里因为还没有学生端，所以都用42号学生来模拟发起选课请求
-    let result = await reqStuChooseCourse(id, 42)
-    if (result.code == 200) {
-        ElMessage.success("选课成功")
-        getCourses();
-    } else {
-        ElMessage.error("选课失败" + result.msg)
+
+    try {
+        // 这里因为还没有学生端，所以都用28号学生来模拟发起选课请求
+        let result = await reqStuChooseCourse(id, 28)
+        if (result.code == 200) {
+            ElMessage.success("选课成功")
+            getCourses();
+        } 
+
+    } catch (error) {
+        ElMessage.error("选课失败" + error)
     }
+
 
 }
 
@@ -231,12 +236,14 @@ const filterStatus = (value: string, row: any) => {
         height: 70%;
     }
 }
+
 .el-table {
-	::v-deep(thead .el-table__cell) {
-		background-color: rgb(64, 158, 255);
-		color: #eee;
-	}
+    ::v-deep(thead .el-table__cell) {
+        background-color: rgb(64, 158, 255);
+        color: #eee;
+    }
 }
+
 .avatar-uploader .avatar {
     min-width: 178px;
     height: 178px;
