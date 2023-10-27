@@ -2,6 +2,7 @@
   <div class="header">
 
     <img class="LOGO" src="@/static/images/LOGO/10.png" alt="">
+    
     <el-menu router class="el-menu-demo" mode="horizontal" style="margin: 0 ;" text-color="#333" active-text-color="#333">
       <div class="tab_left">
 
@@ -15,8 +16,9 @@
       </div>
 
       <div class="tab_right">
+       
         <!-- 根据是否有TOKEN决定是否展示头像 -->
-        <el-menu-item index="/userpage" v-if="userStore.isLogin">
+        <el-menu-item index="/userpage" v-if="userStore.userInfo.userpic">
           <el-avatar :src="userStore.userInfo.userpic" />
           <el-dropdown>
             <span class="el-dropdown-link">

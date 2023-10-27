@@ -8,6 +8,8 @@ enum API {
     GETUSERTOKEN_URL = '/login/tokenInfo',
     // 退出登录
     USERLOGOUT_URL = '/login/logout',
+    // 获取当前用户信息
+    GETUSERINFO_URL = '/login/getUser',
     // 分页获取用户信息
     GETUSERLIST_URL = '/user/list?',
     // 新增用户信息
@@ -66,3 +68,6 @@ export const reqGetUserByName = (name: string, pageNo?: number, pageSize?: numbe
         return request.post<any, any>(API.GETUSERBYNAME_URL + `name=${name}&pageNo=${pageNo}&pageSize=${pageSize}`)
     }
 }
+
+// 获取用户信息方法
+export const reqGetUserInfo = () => request.get<any, any>(API.GETUSERINFO_URL)

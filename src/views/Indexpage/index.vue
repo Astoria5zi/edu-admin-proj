@@ -15,6 +15,8 @@
             <CourseCard></CourseCard>
         </div>
 
+
+
         <!-- 底部导航 -->
         <Footer></Footer>
     </div>
@@ -34,6 +36,7 @@ import Card from '@/components/card/index.vue'
     margin: 0 auto;
     width: 80%;
 }
+
 
 
 

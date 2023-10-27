@@ -9,12 +9,12 @@
 				<el-card shadow="hover" :body-style="{ padding: '0px' }" style="height: 40%;">
 					<!-- 头像行 -->
 					<div class="avatar" style="height: 135px; margin-left: 20px;">
-						<el-avatar :icon="UserFilled" style="height: 80px;width: 80px;"
-							src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-						<span style="margin-left: 40px; font-size: 20px;">admin</span>
-
+						<el-avatar :icon="UserFilled" style="height: 80px;width: 80px;" :src="userStore.userInfo.userpic" />
+						<span style="margin-left: 40px; font-size: 20px;">{{userStore.userInfo.username}}</span>
+						<el-tag class="ml-2"  size="large" style="margin-left: 20px;">管理员</el-tag>
 					</div>
 					<el-divider style="margin: 0;" />
+					
 					<!-- 信息行 -->
 				</el-card>
 				<el-card shadow="hover" :body-style="{ padding: '0px', height: '100%' }" style="height: 55%;">
@@ -37,7 +37,7 @@
 						</div>
 						<div class="content">
 							<h1 style="font-size: 24px;color: rgb(45, 140, 240);font-family: ARIAL;">9999</h1>
-							<h2 style="font-size: 14px;color: rgb(180,189,201);margin-top: 5px;">用户访问量</h2>
+							<h2 style="font-size: 14px;color: rgb(180,189,201);margin-top: 5px;">用户数量</h2>
 						</div>
 					</el-card>
 					<!-- 卡片2 -->
@@ -49,7 +49,7 @@
 						</div>
 						<div class="content">
 							<h1 style="font-size: 24px;color: rgb(45, 140, 240);font-family: ARIAL;">9999</h1>
-							<h2 style="font-size: 14px;color: rgb(180,189,201);margin-top: 5px;">消息通知</h2>
+							<h2 style="font-size: 14px;color: rgb(180,189,201);margin-top: 5px;">课程数量</h2>
 						</div>
 					</el-card>
 					<!-- 卡片3 -->
@@ -61,7 +61,7 @@
 						</div>
 						<div class="content">
 							<h1 style="font-size: 24px;color: rgb(45, 140, 240);font-family: ARIAL;">9999</h1>
-							<h2 style="font-size: 14px;color: rgb(180,189,201);margin-top: 5px;">本月订单</h2>
+							<h2 style="font-size: 14px;color: rgb(180,189,201);margin-top: 5px;">订单数量</h2>
 						</div>
 					</el-card>
 				</div>
@@ -73,8 +73,6 @@
 					</el-card>
 
 				</div>
-
-
 			</div>
 		</div>
 
@@ -94,6 +92,9 @@
 </template>
 
 <script setup lang="ts">
+// 引入用户仓库
+import useUserStore from '@/store/user';
+let userStore = useUserStore()
 // 引入饼状图
 import radius from './radius.vue'
 // 引入折线图

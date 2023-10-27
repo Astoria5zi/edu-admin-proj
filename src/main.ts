@@ -35,7 +35,8 @@ import "video.js/dist/video-js.css";
 import echarts from '@/utils/echarts'
 app.config.globalProperties.echarts = echarts;
  
-
+// 引入路由鉴权文件
+import './permisstions'
 
 // 安装插件
 app.use(ElementPlus, {
