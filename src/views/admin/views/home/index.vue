@@ -10,11 +10,11 @@
 					<!-- 头像行 -->
 					<div class="avatar" style="height: 135px; margin-left: 20px;">
 						<el-avatar :icon="UserFilled" style="height: 80px;width: 80px;" :src="userStore.userInfo.userpic" />
-						<span style="margin-left: 40px; font-size: 20px;">{{userStore.userInfo.username}}</span>
-						<el-tag class="ml-2"  size="large" style="margin-left: 20px;">管理员</el-tag>
+						<span style="margin-left: 40px; font-size: 20px;">{{ userStore.userInfo.username }}</span>
+						<el-tag class="ml-2" size="large" style="margin-left: 20px;">管理员</el-tag>
 					</div>
 					<el-divider style="margin: 0;" />
-					
+
 					<!-- 信息行 -->
 				</el-card>
 				<el-card shadow="hover" :body-style="{ padding: '0px', height: '100%' }" style="height: 55%;">
@@ -36,7 +36,7 @@
 							</el-icon>
 						</div>
 						<div class="content">
-							<h1 style="font-size: 24px;color: rgb(45, 140, 240);font-family: ARIAL;">9999</h1>
+							<h1 style="font-size: 24px;color: rgb(45, 140, 240);font-family: ARIAL;">{{ userCount }}</h1>
 							<h2 style="font-size: 14px;color: rgb(180,189,201);margin-top: 5px;">用户数量</h2>
 						</div>
 					</el-card>
@@ -48,7 +48,7 @@
 							</el-icon>
 						</div>
 						<div class="content">
-							<h1 style="font-size: 24px;color: rgb(45, 140, 240);font-family: ARIAL;">9999</h1>
+							<h1 style="font-size: 24px;color: rgb(45, 140, 240);font-family: ARIAL;">{{ courseCount }}</h1>
 							<h2 style="font-size: 14px;color: rgb(180,189,201);margin-top: 5px;">课程数量</h2>
 						</div>
 					</el-card>
@@ -60,7 +60,7 @@
 							</el-icon>
 						</div>
 						<div class="content">
-							<h1 style="font-size: 24px;color: rgb(45, 140, 240);font-family: ARIAL;">9999</h1>
+							<h1 style="font-size: 24px;color: rgb(45, 140, 240);font-family: ARIAL;">{{ orderCount }}</h1>
 							<h2 style="font-size: 14px;color: rgb(180,189,201);margin-top: 5px;">订单数量</h2>
 						</div>
 					</el-card>
@@ -92,6 +92,8 @@
 </template>
 
 <script setup lang="ts">
+// 引入数据统计相关方法
+import { reqGetUserCount, reqGetCourseCount, reqGetOrderCount } from '@/api/statistic'
 // 引入用户仓库
 import useUserStore from '@/store/user';
 let userStore = useUserStore()
@@ -103,13 +105,28 @@ import * as echarts from 'echarts/core';
 import { GridComponent } from 'echarts/components';
 import { BarChart } from 'echarts/charts';
 import { CanvasRenderer } from 'echarts/renderers';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { LegendComponent } from 'echarts/components';
 import { UserFilled } from '@element-plus/icons-vue'
 echarts.use([GridComponent, BarChart, CanvasRenderer, LegendComponent]);
 
+// 展示用户数据
+let userCount = ref()
+let courseCount = ref()
+let orderCount = ref()
 
-
+// 获取用户|课程|订单数量
+const statisticInit = async () => {
+	// 用户
+	let getUserRes = await reqGetUserCount()
+	userCount.value = getUserRes.data
+	// 课程
+	let getCourseRes = await reqGetCourseCount()
+	// 订单
+	courseCount.value = getCourseRes.data
+	let getOrderRes = await reqGetOrderCount()
+	orderCount.value = getOrderRes.data
+}
 
 // echarts初始化函数
 function init() {
@@ -145,8 +162,12 @@ function init() {
 	});
 }
 
+
 // 挂载时渲染表格
-onMounted(() => { init() })
+onMounted(async () => {
+	await statisticInit()
+	init()
+})
 </script>
 
 <style scoped lang="scss">
