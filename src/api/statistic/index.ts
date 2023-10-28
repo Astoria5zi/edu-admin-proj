@@ -15,7 +15,9 @@ enum API {
     // 查询用户数量接口
     GETUSERCOUNT_URL = '/statistic/teacherCount',
     // 查询用户饼图接口
-    GETUSERPIE_URL = '/statistic/userPie'
+    GETUSERPIE_URL = '/statistic/userPie',
+    // 查询课程类型柱状图
+    GETCOURSEBAR_URL = '/statistic/courseType'
 
 }
 
@@ -34,3 +36,5 @@ export const reqGetTeacherCount = () => request.get<any, any>(API.GETTEACHERCOUN
 export const reqGetUserCount = () => request.get<any, any>(API.GETUSERCOUNT_URL);
 // 查询用户饼图方法
 export const reqGetUserPie = () => request.get<any, any>(API.GETUSERPIE_URL);
+// 查询课程柱状图方法
+export const reqGetCourseBar = () =>request.get<any,any>(API.GETCOURSEBAR_URL)

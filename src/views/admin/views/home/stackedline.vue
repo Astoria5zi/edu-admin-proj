@@ -2,6 +2,8 @@
     <div id="stackedline"></div>
 </template>
 <script setup lang="ts">
+// 引入数据统计相关方法
+import { reqGetOrderLine } from '@/api/statistic'
 import * as echarts from 'echarts/core';
 import {
     TitleComponent,
@@ -24,7 +26,22 @@ echarts.use([
     CanvasRenderer,
     UniversalTransition
 ]);
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+
+// 折线数据存储
+let stacklineData = ref()
+// 数据初始化
+const dataInit = async () => {
+    let dataRes = await reqGetOrderLine()
+    // 处理一下响应的数据,替换成echarts需要的样式
+    dataRes = dataRes.data.map((item: any) => {
+        return {
+            month: item.month,
+            value: item.price
+        };
+    })
+    stacklineData.value = dataRes
+}
 
 // echarts初始化函数
 function init() {
@@ -103,7 +120,10 @@ function init() {
 }
 
 // 挂载时渲染表格
-onMounted(() => { init() })
+onMounted(async () => {
+    await dataInit()
+    init()
+})
 </script>
 
 

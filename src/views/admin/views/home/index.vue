@@ -67,11 +67,9 @@
 				</div>
 				<!-- 待办事项 -->
 				<div class="waitlist">
-
 					<el-card shadow="hover" :body-style="{ padding: '0px', height: '100%' }">
-						<stackedline></stackedline>
+						<el-calendar />
 					</el-card>
-
 				</div>
 			</div>
 		</div>
@@ -93,14 +91,12 @@
 
 <script setup lang="ts">
 // 引入数据统计相关方法
-import { reqGetUserCount, reqGetCourseCount, reqGetOrderCount } from '@/api/statistic'
+import { reqGetUserCount, reqGetCourseCount, reqGetOrderCount, reqGetCourseBar } from '@/api/statistic'
 // 引入用户仓库
 import useUserStore from '@/store/user';
 let userStore = useUserStore()
 // 引入饼状图
 import radius from './radius.vue'
-// 引入折线图
-import stackedline from './stackedline.vue'
 import * as echarts from 'echarts/core';
 import { GridComponent } from 'echarts/components';
 import { BarChart } from 'echarts/charts';
@@ -109,11 +105,19 @@ import { onMounted, ref } from 'vue';
 import { LegendComponent } from 'echarts/components';
 import { UserFilled } from '@element-plus/icons-vue'
 echarts.use([GridComponent, BarChart, CanvasRenderer, LegendComponent]);
+// 引入数据统计相关方法
+import { reqGetOrderLine } from '@/api/statistic'
 
 // 展示用户数据
 let userCount = ref()
 let courseCount = ref()
 let orderCount = ref()
+
+// 折线图数据存储区
+// 横坐标
+let xLabel = ref([])
+let xData = ref([])
+
 
 // 获取用户|课程|订单数量
 const statisticInit = async () => {
@@ -127,6 +131,17 @@ const statisticInit = async () => {
 	let getOrderRes = await reqGetOrderCount()
 	orderCount.value = getOrderRes.data
 }
+// 直方图数据初始化
+const dataInit = async () => {
+	let dataRes = await reqGetCourseBar()
+	// 处理一下响应的数据,替换成echarts需要的样式
+	xLabel.value = dataRes.data.map((item: any) => item.courseTypeName)
+	xData.value = dataRes.data.map((item: any) => item.number)
+	console.log(xLabel.value);
+
+
+}
+
 
 // echarts初始化函数
 function init() {
@@ -136,21 +151,21 @@ function init() {
 	// 指定图表的配置项和数据
 	const option = {
 		title: {
-			text: 'ECharts 入门示例'
+			text: '课程数量'
 		},
 		tooltip: {},
 		legend: {
-			data: ['销量']
+			data: ['课程数量']
 		},
 		xAxis: {
-			data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+			data: xLabel.value
 		},
 		yAxis: {},
 		series: [
 			{
 				name: '销量',
 				type: 'bar',
-				data: [5, 20, 36, 10, 10, 20]
+				data: xData.value
 			}
 		]
 	};
@@ -166,6 +181,7 @@ function init() {
 // 挂载时渲染表格
 onMounted(async () => {
 	await statisticInit()
+	await dataInit()
 	init()
 })
 </script>
@@ -255,6 +271,9 @@ onMounted(async () => {
 					height: 100%;
 					width: 98.5%;
 
+					::v-deep(.el-calendar-table .el-calendar-day) {
+						height: 50px;
+					}
 
 
 				}
@@ -274,9 +293,11 @@ onMounted(async () => {
 
 		.el-card {
 			width: 100%;
+	
 
 			#main {
-				width: 50%;
+
+				width: 70%;
 				height: 100%;
 			}
 		}
