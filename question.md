@@ -157,8 +157,6 @@
    - 这里不能使用封装的axios，必须使用原生的axios发请求，因为封装的axios设置返回类型为blob无效
    - 但是用原生的axios要求后端去解决跨域问题，最终解决了
 
-### 10.30
->>> /course-category/st根据小分类节点查询课程信息 需要返回的数据中有教师信息
 
 ### 一
 - 狂神说JAVA  MyBatis Spring SpringMVC SpringBoot  java编程思想
@@ -171,3 +169,9 @@
 
 ### 三
 - 若依 看源码 GPT
+
+### 10.30
+>>> /course-category/st根据小分类节点查询课程信息 需要返回的数据中有教师信息
+1. 完成登录的验证码功能
+
+
