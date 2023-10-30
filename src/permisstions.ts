@@ -8,14 +8,12 @@ let userStore = useUserStore(pinia)
 
 // 路由守卫
 router.beforeEach(async (to, from, next) => {
-    console.log('触发路由守卫');
     // 获取token判断是否登录
     let token = userStore.token
     // 获取用户信息
     let userInfo = userStore.userInfo
     // 有token
     if (token) {
-        console.log('有token');
         if (userInfo.username) {
             next()
         } else {
