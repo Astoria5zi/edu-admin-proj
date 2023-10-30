@@ -23,7 +23,9 @@ enum API {
     // 更改用户状态接口
     CHANGESTATUS_URL = '/user/status/',
     // 通过姓名查找用户信息
-    GETUSERBYNAME_URL = '/user/find?'
+    GETUSERBYNAME_URL = '/user/find?',
+    // 获取验证码接口
+    GETCHECKCODE_URL = '/login/common/verify'
 }
 
 // 获取所有课程信息方法
@@ -71,3 +73,6 @@ export const reqGetUserByName = (name: string, pageNo?: number, pageSize?: numbe
 
 // 获取用户信息方法
 export const reqGetUserInfo = () => request.get<any, any>(API.GETUSERINFO_URL)
+
+// 获取验证码方法
+export const reqGetCheckCode = () => request.get<any, any>(API.GETCHECKCODE_URL)

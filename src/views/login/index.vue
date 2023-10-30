@@ -22,6 +22,10 @@
             <el-form-item>
               <el-button type="primary" class="login_btn" @click="login">登录</el-button>
             </el-form-item>
+            <el-form-item label="验证码" >
+              <img :src="verifyCode" alt="验证码">
+            </el-form-item>
+            
           </el-form>
         </el-col>
       </el-row>
@@ -34,12 +38,50 @@
 
 <script setup lang='ts'>
 import { ElNotification } from 'element-plus';
+import { reqGetCheckCode } from '@/api/user'
 // 引入用户小仓库
 import useUserStore from '@/store/user';
 import { useRouter } from 'vue-router';
+import axios from "axios";
+import { onMounted, ref } from 'vue';
 let userStore = useUserStore()
 // 获取路由器
 let $router = useRouter()
+// 验证码
+let verifyCode = ref()
+
+
+// 生成验证码方法
+const generateCode = async () => {
+  console.log('生成验证码');
+  axios({
+    method: 'get',
+    url: 'http://82.157.136.14:8081/login/common/verify',
+    responseType: 'blob' // 设置响应类型为 Blob
+  })
+    .then(response => {
+      try {
+        // 创建 Blob 对象和下载链接
+        const blob = new Blob([response.data], { type: ' application/vnd.ms-excel;charset=utf-8 ' });
+
+        const blobUrl = window.URL.createObjectURL(blob);
+        verifyCode.value = blobUrl
+        console.log(verifyCode.value);
+        
+
+        // 释放 Blob URL，防止内存泄漏
+        window.URL.revokeObjectURL(blobUrl);
+      } catch (error) {
+        console.error(error);
+      }
+    })
+    .catch(error => {
+      console.error(error);
+    });
+
+
+
+}
 
 // 点击登录触发回调
 const login = () => {
@@ -70,6 +112,9 @@ const getTime = () => {
   return message
 }
 
+onMounted(async () => {
+  await generateCode()
+})
 
 </script>
 
