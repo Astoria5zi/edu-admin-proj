@@ -1,5 +1,6 @@
 // 保存学生相关的api
 import request from "@/utils/request"
+
 // 学生用户相关的请求地址
 enum API {
     // 获取学生列表接口
@@ -9,7 +10,9 @@ enum API {
     // 修改学生接口
     UPDATESTUDENT_URL = '/student/update',
     // 根据id获取学生信息
-    GETSTUINFOBYID_URL = '/student/get/'
+    GETSTUINFOBYID_URL = '/student/get/',
+    // 导出学生信息表
+    OUTPUTEXCEL_URL = '/student/export'
 }
 
 // 获取所有学生信息请求
@@ -31,4 +34,7 @@ export const reqUpdateStudent = (xcStudent: any) => request.put<any, any>(API.UP
 
 // 根据id获取学生信息方法
 export const reqGetStudentInfoById = (stuId: number) => request.get<any, any>(API.GETSTUINFOBYID_URL + `${stuId}`)
+
+// 导出学生信息表功能
+export const reqOutputstudent = () => request.post<any, any>(API.OUTPUTEXCEL_URL,{ responseType: 'blob'})
 

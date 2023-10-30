@@ -7,6 +7,8 @@
 		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询</el-button>
 		<!-- 添加学生按钮 -->
 		<el-button type="primary" size="default" @click="addTeacherBtn" style="margin: 10px;">添加学生</el-button>
+		<!-- 导出学生信息 -->
+		<el-button type="primary" size="default" @click="outputBtn" style="margin: 10px;">导出</el-button>
 		<!-- 展示学生列表 -->
 		<el-table :data="studentsArr" border style="width: 100%" max-height="75vh " stripe :show-overflow-tooltip="true">
 			<el-table-column label="序号" type="index" algin="center" width="100" align="center"></el-table-column>
@@ -135,15 +137,15 @@
 import { Search } from '@element-plus/icons-vue'
 import { onMounted, reactive, ref } from 'vue';
 // 获取学生相关接口
-import { reqAddTeacher} from '@/api/teacher'
+import { reqAddTeacher } from '@/api/teacher'
 // 获取学生相关接口
-import { reqGetStudentList, reqDeleteStudent, reqUpdateStudent, reqGetStudentInfoById } from '@/api/student'
+import { reqGetStudentList, reqDeleteStudent, reqUpdateStudent, reqGetStudentInfoById, reqOutputstudent } from '@/api/student'
 // 获取上传文件接口
 import { reqUploadFile } from '@/api/common'
 import { Picture as IconPicture } from '@element-plus/icons-vue'
 import type { UploadProps, } from 'element-plus'
 import { ElMessage, ElMessageBox, type FormInstance } from 'element-plus'
-
+import axios from "axios";
 // 当前页码
 let pageNo = ref(1)
 // 页码大小
@@ -372,6 +374,41 @@ const btnInquire = () => {
 
 }
 
+// 导出学生信息按钮回调
+const outputBtn = async () => {
+	axios({
+		method: 'post',
+		url: 'http://82.157.136.14:8081/student/export',
+		responseType: 'blob' // 设置响应类型为 Blob
+	})
+		.then(response => {
+			try {
+				let fileName = 'outputFile.xlsx'; // 默认文件名
+
+				// 创建 Blob 对象和下载链接
+				const blob = new Blob([response.data], { type: ' application/vnd.ms-excel;charset=utf-8 ' });
+
+				const blobUrl = window.URL.createObjectURL(blob);
+				const downloadLink = document.createElement('a');
+
+				// 设置下载链接的属性
+				downloadLink.href = blobUrl;
+				downloadLink.download = fileName;
+
+				// 触发下载
+				downloadLink.click();
+
+				// 释放 Blob URL，防止内存泄漏
+				window.URL.revokeObjectURL(blobUrl);
+			} catch (error) {
+				console.error(error);
+			}
+		})
+		.catch(error => {
+			console.error(error);
+		});
+
+}
 
 </script>
 
