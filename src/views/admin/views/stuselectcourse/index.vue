@@ -179,6 +179,8 @@ const btnInquire = async () => {
     // 然后发分页请求
     pageNo.value = 1
     result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
+    console.log(result.data);
+    
     coursesArr.value = result.data.items
 }
 

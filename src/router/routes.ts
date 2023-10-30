@@ -125,6 +125,13 @@ export const constantRoute = [
 					title: '订单管理',
 				},
 			},
+			// 管理中心 -- 班级管理
+			{
+				path: '/admin/lesson', component: () => import('@/views/admin/views/lesson/index.vue'), name: 'lesson',
+				meta: {
+					title: '班级管理',
+				},
+			}
 		]
 	},
 ]

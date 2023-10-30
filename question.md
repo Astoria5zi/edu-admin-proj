@@ -156,6 +156,18 @@
 1. 完成文件导出功能：
    - 这里不能使用封装的axios，必须使用原生的axios发请求，因为封装的axios设置返回类型为blob无效
    - 但是用原生的axios要求后端去解决跨域问题，最终解决了
-2. 
 
+### 10.30
+>>> /course-category/st根据小分类节点查询课程信息 需要返回的数据中有教师信息
 
+### 一
+- 狂神说JAVA  MyBatis Spring SpringMVC SpringBoot  java编程思想
+- 云E办 乐字节 
+- 遇到不会的知识点，去学习
+
+### 二
+- SpringCloud 黑马程序员（消息队列）
+- 谷粒商城 尚硅谷 苍穹外卖
+
+### 三
+- 若依 看源码 GPT
