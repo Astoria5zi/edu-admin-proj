@@ -114,6 +114,8 @@ const getCourses = async () => {
   });
 
   coursesArr.value = result.data.items;
+  
+  
   total.value = result.data.counts;
 };
 

@@ -10,9 +10,15 @@
 		<el-button type="primary" size="default" @click="addTeacherBtn" style="margin: 10px;">添加教师</el-button>
 		<!-- 展示教师列表 -->
 		<el-table :data="teachersArr" border style="width: 100%" max-height="75vh " stripe :show-overflow-tooltip="true">
-			<el-table-column label="序号" type="index" algin="center" width="150" align="center"></el-table-column>
-			<el-table-column prop="id" label="编号" width="150" align="center" />
-			<el-table-column prop="name" label="姓名" width="150" align="center" />
+			<el-table-column label="序号" type="index" algin="center" width="100" align="center"></el-table-column>
+			<el-table-column prop="id" label="编号" width="100" align="center" />
+			<el-table-column prop="name" label="姓名" width="120" align="center" />
+			<el-table-column prop="courseList" label="所授课程" width="320" align="center" >
+				<template #="{ row }">				
+					<el-tag v-for="item in row.courseList">{{item.courseName}}</el-tag>
+					<!-- <span v-for="item in row.courseList">{{item.courseName}}&nbsp;</span> -->
+				</template>
+			</el-table-column>
 			<el-table-column prop="intro" label="个人简介" header-align="center" />
 			<el-table-column prop="resume" label="职称" width="150" align="center" />
 			<el-table-column prop="pic" label="证件照" width="150" align="center">
@@ -191,6 +197,7 @@ const rules = reactive({
 const getTeachers = async () => {
 	let result = await reqGetTeacherList(pageNo.value, pageSize.value)
 	teachersArr.value = result.data.items
+
 	total.value = result.data.counts
 }
 // 封装一个清空对象属性值方法
