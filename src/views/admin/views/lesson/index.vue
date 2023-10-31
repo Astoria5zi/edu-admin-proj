@@ -3,17 +3,30 @@
 	<div v-if="!isAdd" class="teacher-table">
 
 		<!-- 班级的级联选择器 -->
-		<el-cascader v-model="cascaderValue" :options="treeNodeCourseArr" @change="handleChange" :props="cascaderProps"
-			clearable>
-			<template #default="{ node, data }">
-				<span>{{ data.label }}</span>
-			</template>
-		</el-cascader>
+		<el-select v-model="selectLesson" placeholder="请选择开课班级" clearable>
+			<el-option v-for=" item  in  publishCourseArr " :key="item.id" :label="item.name" :value="item.id" />
+		</el-select>
 
 		<!-- 课程查询按钮 -->
-		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询班级详情</el-button>
-		<!-- 课程查询按钮 -->
-		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">管理班级教师</el-button>
+		<el-button type="primary" @click="btnSelectClass" style="margin: 10px 0px 10px 10px">查询班级详情</el-button>
+
+		<!-- 管理班级教师按钮 -->
+		<el-button type="primary" :disabled="!selectLesson" @click="btnAdminClassTeacher"
+			style="margin: 10px 0px 10px 10px">管理班级教师</el-button>
+		<!-- 班级教师对话框(此处进行班级教师的添加和删除) -->
+		<el-dialog v-model="teacherDialogVisible" title="当前课程名称" width="50%" center align-center>
+			<el-transfer v-model="currentClassTeacher" :data="data" :titles="['全部教师', '授课教师']" :button-texts="['撤销', '选择']"
+				@change="teacherChange" />
+			<template #footer>
+				<span class="dialog-footer">
+					<el-button @click="teacherDialogVisible = false">取消</el-button>
+					<el-button type="primary" @click="teacherDialogVisible = false">
+						确定
+					</el-button>
+				</span>
+			</template>
+		</el-dialog>
+
 		<!-- 课程查询按钮 -->
 		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">管理班级学生</el-button>
 
@@ -69,19 +82,26 @@
 </template>
     
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+
+import { onBeforeMount, onMounted, ref } from "vue";
 // 获取课程相关接口
 import {
 	reqCourseList,
-	reqGetCourseById,
 	reqGetTreeNodeCourse,
 	reqGetTreeNodeCourseById,
 	reqGetCourseBySt,
 	reqAddNewCourse,
 
 	reqEditCourse,
-	reqUploadCourse
+	reqUploadCourse,
+	reqGetAllPublishCourse
 } from "@/api/course";
+
+// 引入教师相关接口
+import { reqGetTeacherList,reqAddClassTeacher } from "@/api/teacher";
+// 引入班级管理相关接口
+import { reqClassTeacher } from '@/api/lesson'
+
 import { ElMessage } from "element-plus";
 
 
@@ -95,19 +115,65 @@ let total = ref(0);
 let isAdd = ref(false);
 // 存储课程列表
 let coursesArr = ref([]);
-// 树状课程数组
-let treeNodeCourseArr = ref([]);
+
 // 级联选择器绑定值
 let cascaderValue = ref<string[]>([]);
-// 级联选择器配置对象
-const cascaderProps = {
-	children: "childrenTreeNodes",
-	expandTrigger: "hover",
-	value: 'id',
-	label: 'label'
-};
+// 已发布课程数组
+let publishCourseArr = ref([])
+
+// 选择器绑定的查看班级
+let selectLesson = ref()
+// 管理班级教师对话框开关
+let teacherDialogVisible = ref(false)
+
 // 是否正在按条件查询标志
 let isConditonFlag = ref(false)
+
+
+
+// #region ================== 班级教师穿梭框选项配置 =================
+interface Option {
+	key: number
+	label: string
+	disabled: boolean
+}
+const data = ref<Option[]>()
+
+// 当前班级负责教师
+const currentClassTeacher = ref()
+// 所有教师数组
+let teachersIdArr = ref([])
+// #endregion ======================= end =======================
+
+
+// 查询班级详情按钮回调
+const btnSelectClass = async () => {
+
+
+}
+
+// 管理班级教师按钮回调
+const btnAdminClassTeacher = async () => {
+	try {
+		let res = await reqClassTeacher(selectLesson.value)
+		// 给当前教师数组赋值
+		currentClassTeacher.value = res.data.map((item: any) => {
+			return item.teacherId
+		})
+		// 打开管理教师对话框
+		teacherDialogVisible.value = true
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+// 穿梭框右侧元素改变时的回调
+const teacherChange = async () => {
+	console.log('当前班主任发生改变');
+
+	
+}
+
 
 // 封装获取课程方法
 const getCourses = async () => {
@@ -120,12 +186,40 @@ const getCourses = async () => {
 	total.value = result.data.counts;
 };
 
-// 组件挂载时获课程师信息
+// 封装获取所有已发布课程方法
+const getAllPublishCourse = async () => {
+	// 此处暂时用1000代表获取所有课程信息
+	let res = await reqGetAllPublishCourse(1, 1000)
+	publishCourseArr.value = res.data.items
+}
+
+// 封装所有教师信息方法
+const getAllTeacherInfo = async () => {
+	let result = await reqGetTeacherList()
+	teachersIdArr.value = result.data.items.map((item: any) => ({ id: item.id, name: item.name }));
+
+	// 先把穿梭框data属性配置一下
+	data.value = teachersIdArr.value.map((item: any) => {
+		return {
+			key: item.id,
+			label: item.name,
+			disabled: false // 设置disabled属性为true
+		};
+	});
+	return teachersIdArr.value; // 返回响应式数据
+}
+
+// 组件挂载钩子
 onMounted(async () => {
-	getCourses();
-	// 获取所有一级分类ID
-	treeNodeCourseArr.value = await reqGetTreeNodeCourse();
+	// 获取课程信息
+	await getAllPublishCourse()
+	// 获取所有教师信息(用于班级新增教师选择教师)
+	await getAllTeacherInfo()
+
 });
+
+
+
 
 // 当前页面改变触发回调
 const handleCurrentChange = async () => {
@@ -209,7 +303,13 @@ const uploadCourse = async (id: number) => {
     
     
 <style scoped lang="scss">
-.el-table {
+::v-deep(.el-dialog) {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+::v-deep() .el-table {
 	::v-deep(thead .el-table__cell) {
 		background-color: rgb(64, 158, 255);
 		color: #eee;

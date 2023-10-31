@@ -74,18 +74,13 @@ onMounted(() => {
 
 // #endregion 
 
-
-
-
-
-
 let userStore = useUserStore()
 // 获取路由器
 let $router = useRouter()
 
 // 点击登录触发回调
 const login = () => {
-  if (inputIdentifyCode.value == identifyCode.value) {
+  // if (inputIdentifyCode.value == identifyCode.value) {
     userStore.userLogin()
     // 跳转到主页
     $router.push({ path: '/' })
@@ -95,9 +90,9 @@ const login = () => {
       title: `hi,${getTime()}好`,
       message: '欢迎回来'
     })
-  }else{
-    ElMessage.error("验证码错误")
-  }
+  // }else{
+  //   ElMessage.error("验证码错误")
+  // }
 
 }
 

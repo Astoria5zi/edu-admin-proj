@@ -24,8 +24,10 @@ enum API {
 	// 课程审核接口
 	PUBLISHCOURSE_URL = '/publish/audit',
 	// 提交审核接口
-	UPLOADCOURSE_URL = '/publish/commit/'
-	
+	UPLOADCOURSE_URL = '/publish/commit/',
+	// 获取所有已发布课程信息接口
+	GETALLPUBLISHCLASS_URL = '/publish/list?'
+
 
 }
 
@@ -67,3 +69,6 @@ export const reqPublishCourse = (id: number, status: string) => request.post<any
 
 // 提交课程审核方法
 export const reqUploadCourse = (id: number) => request.post<any, any>(API.UPLOADCOURSE_URL + `${id}`)
+
+// 获取所有已发布课程方法
+export const reqGetAllPublishCourse = (pageNo: number, pageSize: number) => request.post<any, any>(API.GETALLPUBLISHCLASS_URL + `pageNo=${pageNo}&pageSize=${pageSize}`)
