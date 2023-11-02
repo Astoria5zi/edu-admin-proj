@@ -272,7 +272,7 @@ onMounted(async () => {
 					width: 98.5%;
 
 					::v-deep(.el-calendar-table .el-calendar-day) {
-						height: 50px;
+						height: 5.5vh;
 					}
 
 

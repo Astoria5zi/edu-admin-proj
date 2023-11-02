@@ -22,7 +22,7 @@
       <el-table-column label="序号" type="index" algin="center" width="60" align="center"></el-table-column>
       <el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
       <el-table-column prop="name" label="课程名称" width="180" align="center" />
-      <el-table-column prop="description" label="课程简介" show-overflow-tooltip align="center" />
+      <el-table-column prop="description" label="课程简介"  width="180" show-overflow-tooltip align="center" />
       <el-table-column prop="createDate" label="上传时间" width="200" show-overflow-tooltip align="center" />
       <el-table-column prop="users" label="适合人群" width="120" show-overflow-tooltip align="center" />
       <el-table-column prop="auditStatus" label="审核状态" width="100" align="center">
@@ -64,7 +64,7 @@
           </el-popconfirm>
         </template>
       </el-table-column>
-      <el-table-column label="基本操作" width="180" align="center">
+      <el-table-column label="基本操作" width="180" align="center" fixed="right">
         <!-- 已发布|提交审核|审核通过的课程不能修改和删除 -->
         <template #="{ row }">
           <el-button :disabled="row.status == 203002 || row.auditStatus == 202003" type="primary" size="small"

@@ -1,77 +1,72 @@
 <template>
 	<!-- 展示课程列表以及操作 -->
-	<div v-if="!isAdd" class="teacher-table">
+	<div v-if="!isAdd" class="class-table">
+		<!-- 顶部信息 -->
+		<div class="class-table-header">
+			<!-- 左侧操作 -->
+			<div class="header-left">
+				<!-- 班级的级联选择器 -->
+				<el-select v-model="selectLesson" placeholder="请选择开课班级" clearable>
+					<el-option v-for=" item  in  publishCourseArr " :key="item.id" :label="item.name" :value="item.id" />
+				</el-select>
 
-		<!-- 班级的级联选择器 -->
-		<el-select v-model="selectLesson" placeholder="请选择开课班级" clearable>
-			<el-option v-for=" item  in  publishCourseArr " :key="item.id" :label="item.name" :value="item.id" />
-		</el-select>
+				<!-- 课程查询按钮 -->
+				<el-button type="primary" @click="btnSelectClass" style="margin: 10px 0px 10px 10px">查询班级详情</el-button>
 
-		<!-- 课程查询按钮 -->
-		<el-button type="primary" @click="btnSelectClass" style="margin: 10px 0px 10px 10px">查询班级详情</el-button>
+				<!-- 管理班级教师按钮 -->
+				<el-button type="primary" :disabled="!selectLesson" @click="btnAdminClassTeacher"
+					style="margin: 10px 0px 10px 10px">管理班级教师</el-button>
+				<!-- 班级教师对话框(此处进行班级教师的添加和删除) -->
+				<el-dialog v-model="teacherDialogVisible" title="当前课程名称" width="50%" center align-center>
+					<el-transfer v-model="currentClassTeacher" :data="data" :titles="['全部教师', '授课教师']" :button-texts="['撤销', '选择']"
+						@change="teacherChange" />
+					<template #footer>
+						<span class="dialog-footer">
+							<el-button @click="teacherDialogVisible = false">取消</el-button>
+							<el-button type="primary" @click="teacherDialogVisible = false">
+								确定
+							</el-button>
+						</span>
+					</template>
+				</el-dialog>
+				<!-- 课程查询按钮 -->
+				<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">管理班级学生</el-button>
+			</div>
 
-		<!-- 管理班级教师按钮 -->
-		<el-button type="primary" :disabled="!selectLesson" @click="btnAdminClassTeacher"
-			style="margin: 10px 0px 10px 10px">管理班级教师</el-button>
-		<!-- 班级教师对话框(此处进行班级教师的添加和删除) -->
-		<el-dialog v-model="teacherDialogVisible" title="当前课程名称" width="50%" center align-center>
-			<el-transfer v-model="currentClassTeacher" :data="data" :titles="['全部教师', '授课教师']" :button-texts="['撤销', '选择']"
-				@change="teacherChange" />
-			<template #footer>
-				<span class="dialog-footer">
-					<el-button @click="teacherDialogVisible = false">取消</el-button>
-					<el-button type="primary" @click="teacherDialogVisible = false">
-						确定
-					</el-button>
-				</span>
-			</template>
-		</el-dialog>
-
-		<!-- 课程查询按钮 -->
-		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">管理班级学生</el-button>
+			<!-- 顶部右侧展示信息 -->
+			<div class="header-right">
+				<!-- 展示课程地点和时间 -->
+				<span v-if="classPlace">上课地点：{{ classPlace }}&nbsp;&nbsp;</span>
+				<span v-if="classTime">上课时间：{{ classTime }}</span>
+			</div>
+		</div>
 
 		<!-- 展示课程列表 -->
-		<el-table :data="coursesArr" border style="width: 100%" max-height="700" stripe>
+		<el-table :data="classStudentArr" border style="width: 100%" max-height="700" stripe ref="multipleTableRef"
+			@select="handelSelect()" @select-all="handelSelect()">
+			<el-table-column type="selection" width="55" />
 			<el-table-column label="序号" type="index" algin="center" width="60" align="center"></el-table-column>
-			<el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
-			<el-table-column prop="name" label="课程名称" width="180" align="center" />
-			<el-table-column prop="description" label="课程简介" show-overflow-tooltip align="center" />
-			<el-table-column prop="createDate" label="上传时间" width="200" show-overflow-tooltip align="center" />
-			<el-table-column prop="users" label="适合人群" width="120" show-overflow-tooltip align="center" />
-			<el-table-column prop="auditStatus" label="审核状态" width="100" align="center">
+			<el-table-column prop="userId" label="ID" width="60" align="center"></el-table-column>
+			<el-table-column prop="no" label="学号" width="260" align="center"></el-table-column>
+			<el-table-column prop="userName" label="学生名称" width="180" align="center" />
+			<el-table-column prop="age" label="年龄" show-overflow-tooltip align="center" />
+			<el-table-column prop="cellphone" label="电话" width="200" align="center" />
+			<el-table-column prop="score" label="成绩" width="120" align="center">
 				<template #="{ row }">
-					<span v-if="row.auditStatus == 202001">审核未通过</span>
-					<span v-else-if="row.auditStatus == 202002">未提交审核</span>
-					<span v-else-if="row.auditStatus == 202003">已提交审核</span>
-					<span v-else>审核通过</span>
+					<el-input v-model="row.score" placeholder="Please input" @change="scoreChange(row.score, row.userId)" />
 				</template>
 			</el-table-column>
-			<el-table-column prop="status" label="发布状态" width="100" align="center">
+			<el-table-column prop="ispay" label="缴费状态" width="120" align="center">
 				<template #="{ row }">
-					<span v-if="row.status == 203001">未发布</span>
-					<span v-else-if="row.status == 203002">已发布</span>
-					<span v-else>下线</span>
+					<el-tag v-if="row.ispay" type="success">已支付</el-tag>
+					<el-tag v-else type="danger">未支付</el-tag>
 				</template>
 			</el-table-column>
-			<el-table-column prop="pic" label="课程封面" width="120" show-overflow-tooltip align="center">
-				<template #="{ row }">
-					<img v-if="row.pic" class="table-avatar" :src="row.pic" alt="图片地址失效" />
-					<span v-else>暂无课程图片</span>
-				</template>
-			</el-table-column>
-			<el-table-column label="操作" width="120" align="center">
-				<!-- 已发布和已审核的不能再提交 -->
-				<template #="{ row }">
-					<el-popconfirm title="确认提交审核吗?" @confirm="uploadCourse(row.id)">
-						<template #reference>
-							<el-button :disabled="row.status == 203002 || row.auditStatus == 202003" type="primary" size="small"
-								icon="Upload" title="提交审核"></el-button>
-						</template>
-					</el-popconfirm>
-				</template>
-			</el-table-column>
+
 		</el-table>
 
+		<el-button @click="removeStudent()" type="danger" :disabled="!selectFlag" size="small"
+			style="margin:10px 0 0 5px;">删除</el-button>
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
@@ -83,26 +78,20 @@
     
 <script setup lang="ts">
 
-import { onBeforeMount, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 // 获取课程相关接口
 import {
-	reqCourseList,
-	reqGetTreeNodeCourse,
-	reqGetTreeNodeCourseById,
 	reqGetCourseBySt,
-	reqAddNewCourse,
-
-	reqEditCourse,
-	reqUploadCourse,
 	reqGetAllPublishCourse
 } from "@/api/course";
 
 // 引入教师相关接口
-import { reqGetTeacherList,reqAddClassTeacher } from "@/api/teacher";
+import { reqGetTeacherList } from "@/api/teacher";
 // 引入班级管理相关接口
-import { reqClassTeacher } from '@/api/lesson'
+import { reqClassTeacher, reqUpdateClassTeacher, reqGetClassStudent, reqUpdateStudentScore } from '@/api/lesson'
 
 import { ElMessage } from "element-plus";
+
 
 
 // 当前页码
@@ -113,8 +102,12 @@ let pageSize = ref(10);
 let total = ref(0);
 // 是否点击添加课程
 let isAdd = ref(false);
-// 存储课程列表
-let coursesArr = ref([]);
+// 班级学生列表
+let classStudentArr = ref([]);
+// 上课地点
+let classPlace = ref()
+// 上课时间
+let classTime = ref()
 
 // 级联选择器绑定值
 let cascaderValue = ref<string[]>([]);
@@ -125,7 +118,6 @@ let publishCourseArr = ref([])
 let selectLesson = ref()
 // 管理班级教师对话框开关
 let teacherDialogVisible = ref(false)
-
 // 是否正在按条件查询标志
 let isConditonFlag = ref(false)
 
@@ -138,7 +130,6 @@ interface Option {
 	disabled: boolean
 }
 const data = ref<Option[]>()
-
 // 当前班级负责教师
 const currentClassTeacher = ref()
 // 所有教师数组
@@ -146,9 +137,35 @@ let teachersIdArr = ref([])
 // #endregion ======================= end =======================
 
 
+// #region ==================表格多选功能区（学生批量删除）===========
+// 是否选择了表格的某一行标识
+let selectFlag = ref(false)
+import { ElTable } from 'element-plus'
+const multipleTableRef = ref<InstanceType<typeof ElTable>>()
+// 删除学生
+const removeStudent = () => {
+	let res = multipleTableRef.value!.getSelectionRows()
+	console.log(res);
+}
+// 表格选择行时触发回调
+const handelSelect = () => {
+	let res = multipleTableRef.value!.getSelectionRows()
+	if (res.length) {
+		selectFlag.value = true
+	} else {
+		selectFlag.value = false
+	}
+
+}
+
+
+// #endregion ======================= end =======================
+
+
+
 // 查询班级详情按钮回调
 const btnSelectClass = async () => {
-
+	getClassStudents()
 
 }
 
@@ -169,21 +186,46 @@ const btnAdminClassTeacher = async () => {
 
 // 穿梭框右侧元素改变时的回调
 const teacherChange = async () => {
-	console.log('当前班主任发生改变');
+	console.log('当前班主任发生改变', currentClassTeacher.value);
+	console.log('所有教师：', teachersIdArr.value);
 
-	
+	// currentClassTeacher.value只有当前班级教师的id，没有匹配的名字
+	// 所以此处需要在所有教师数组teachersIdArr中进行查找
+	const teachers = currentClassTeacher.value.map((teacherId: number) => {
+		const foundTeacher = teachersIdArr.value.find(teacher => teacher.id === teacherId);
+		return {
+			teacherId: teacherId,
+			teacherName: foundTeacher ? foundTeacher.name : "" // 如果找到对应教师名字则返回，否则返回空字符串
+		};
+	});
+
+	// 整理完毕当前班级教师后，发起更新请求
+	try {
+		await reqUpdateClassTeacher(selectLesson.value, teachers)
+		console.log('更新教师成功');
+
+	} catch (error) {
+		console.log(error);
+		ElMessage.error('更新班级教师失败')
+	}
+
+
+
+
+
 }
 
 
 // 封装获取课程方法
-const getCourses = async () => {
-	let result = await reqCourseList(pageNo.value, pageSize.value, {
-		auditStatus: "",
-		courseName: "",
-	});
-
-	coursesArr.value = result.data.items;
+const getClassStudents = async () => {
+	let result = await reqGetClassStudent(selectLesson.value, pageNo.value, pageSize.value);
+	classStudentArr.value = result.data.items;
 	total.value = result.data.counts;
+	if (total.value) {
+		classPlace.value = result.data.items[0].place
+		classTime.value = result.data.items[0].classTime
+	}
+
 };
 
 // 封装获取所有已发布课程方法
@@ -218,6 +260,18 @@ onMounted(async () => {
 
 });
 
+// 成绩输入框改变时的回调
+const scoreChange = async (score: number, userId: number) => {
+	try {
+		await reqUpdateStudentScore(selectLesson.value, score, userId)
+	} catch (error) {
+		console.log(error);
+		ElMessage.error("更新成绩失败")
+
+	}
+
+}
+
 
 
 
@@ -227,11 +281,11 @@ const handleCurrentChange = async () => {
 	// 如果是，则调用按条件查询课程的接口
 	if (isConditonFlag.value) {
 		let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-		coursesArr.value = result.data.items
+		classStudentArr.value = result.data.items
 	}
 	// 否则调用基本获取课程的接口
 	else {
-		getCourses();
+		getClassStudents();
 	}
 };
 
@@ -241,24 +295,16 @@ const handleSizeChange = async () => {
 	// 如果是，则调用按条件查询课程的接口
 	if (isConditonFlag.value) {
 		let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-		coursesArr.value = result.data.items
+		classStudentArr.value = result.data.items
 	}
 	// 否则调用基本获取课程的接口
 	else {
-		getCourses();
+		getClassStudents();
 	}
 
 };
 
-// 列表页面级联选择器绑定值变化触发回调
-const handleChange = async (value: any) => {
-	// 如果条件被清空，关闭按条件查询
-	if (!value) {
-		isConditonFlag.value = false
-		pageNo.value = 1
-		await getCourses();
-	}
-};
+
 
 // 点击查询按钮回调
 const btnInquire = async () => {
@@ -270,21 +316,9 @@ const btnInquire = async () => {
 	// 然后发分页请求
 	pageNo.value = 1
 	result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-	coursesArr.value = result.data.items
+	classStudentArr.value = result.data.items
 }
 
-// 提交按钮回调
-const uploadCourse = async (id: number) => {
-
-	let result = await reqUploadCourse(id)
-	if (result.code == 200) {
-		ElMessage.success("提交审核成功")
-		getCourses();
-	} else {
-		ElMessage.error("提交审核失败")
-	}
-
-}
 
 
 
@@ -303,15 +337,23 @@ const uploadCourse = async (id: number) => {
     
     
 <style scoped lang="scss">
+.class-table {
+	.class-table-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+}
+
 ::v-deep(.el-dialog) {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 }
 
-::v-deep() .el-table {
+.el-table {
 	::v-deep(thead .el-table__cell) {
-		background-color: rgb(64, 158, 255);
+		background-color: rgb(91, 172, 252);
 		color: #eee;
 	}
 }

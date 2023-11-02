@@ -22,7 +22,7 @@
 				</template>
 			</el-table-column>
 			<el-table-column prop="email" label="邮箱" align="center" width="280" />
-			<el-table-column prop="address" label="住址" align="center" />
+			<el-table-column prop="address" label="住址" align="center" width="180"/>
 			<el-table-column prop="cellphone" label="电话号码" width="200" align="center">
 			</el-table-column>
 			<el-table-column prop="userpic" label="证件照" width="150" align="center">
@@ -31,7 +31,7 @@
 					<span v-else>暂无学生照片</span>
 				</template>
 			</el-table-column>
-			<el-table-column label="操作" width="200" align="center">
+			<el-table-column label="操作" width="200" align="center" fixed="right">
 				<template #="{ row }">
 					<el-button type="primary" size="small" @click="editTeacher(row.id)" icon="Edit" title="修改学生"></el-button>
 					<el-button type="primary" size="small" @click="searchTeacher(row.id)" icon="Search" title="查看学生详情"></el-button>
