@@ -13,7 +13,13 @@ enum API {
     // 获取班级学生
     GETCLASSSTUDENT_URL = '/class/student/list?',
     // 修改学生成绩接口
-    UPDATESTUDENTSCORE_URL = '/class/student/score?'
+    UPDATESTUDENTSCORE_URL = '/class/student/score?',
+    // 添加班级学生接口
+    ADDCLASSSTUDENT_URL = '/class/student/add?',
+    // 批量删除班级学生接口
+    REMOVESTUDENT_URL = '/class/student/delete?',
+    // 修改学生缴费状态接口
+    UPDATEPAYSTATUS_URL = '/class/student/isPay?'
 
 }
 
@@ -39,3 +45,12 @@ export const reqGetClassStudent = (courseId: number, pageNo?: number, pageSize?:
 
 // 修改学生成绩方法
 export const reqUpdateStudentScore = (courseId: number, score: number, userId: number) => request.put<any, any>(API.UPDATESTUDENTSCORE_URL + `courseId=${courseId}&score=${score}&userId=${userId}`)
+
+// 添加班级学生接口
+export const reqAddClassStudent = (courseId: number, students: any) => request.post<any, any>(API.ADDCLASSSTUDENT_URL + `courseId=${courseId}`, students)
+
+// 删除班级学生接口
+export const reqRemoveClassStudent = (courseId: number, students: any) => request.delete<any, any>(API.REMOVESTUDENT_URL + `courseId=${courseId}`, students)
+
+// 修改学生缴费接口
+export const reqUpdatePayStutas = (courseId: number, payCode: any, userId: number) => request.put<any, any>(API.UPDATEPAYSTATUS_URL + `courseId=${courseId}&payCode=${payCode}&userId=${userId}`)

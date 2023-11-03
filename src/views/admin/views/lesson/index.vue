@@ -17,7 +17,12 @@
 				<el-button type="primary" :disabled="!selectLesson" @click="btnAdminClassTeacher"
 					style="margin: 10px 0px 10px 10px">管理班级教师</el-button>
 				<!-- 班级教师对话框(此处进行班级教师的添加和删除) -->
-				<el-dialog v-model="teacherDialogVisible" title="当前课程名称" width="50%" center align-center>
+				<el-dialog v-model="teacherDialogVisible" width="50%" center align-center>
+					<template #header="{ titleId, titleClass }">
+						<div class="my-header">
+							<h4 :id="titleId" :class="titleClass">{{ className }}-- 教师管理</h4>
+						</div>
+					</template>
 					<el-transfer v-model="currentClassTeacher" :data="data" :titles="['全部教师', '授课教师']" :button-texts="['撤销', '选择']"
 						@change="teacherChange" />
 					<template #footer>
@@ -29,8 +34,30 @@
 						</span>
 					</template>
 				</el-dialog>
-				<!-- 课程查询按钮 -->
-				<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">管理班级学生</el-button>
+
+				<!-- 添加班级学生按钮 -->
+				<el-button type="primary" :disabled="!selectLesson" @click="addClassStudent" style="margin: 10px 0px 10px 10px">添加班级学生</el-button>
+				<!-- 添加学生对话框 -->
+				<el-dialog v-model="studentDialogVisible" width="50%" center align-center>
+					<template #header="{ titleId, titleClass }">
+						<div class="my-header">
+							<h4 :id="titleId" :class="titleClass">{{ className }}-- 添加学生</h4>
+						</div>
+					</template>
+					<el-select v-model="selectClassStuArr" multiple placeholder="Select" style="width: 240px">
+						<el-option v-for="item in unselectCurrentClassStudentArr" :key="item.id" :label="item.name"
+							:value="item.id" />
+					</el-select>
+					<template #footer>
+						<span class="dialog-footer">
+							<el-button @click="studentDialogVisible = false">取消</el-button>
+							<el-button type="primary" @click="confirmAddStu">
+								确定
+							</el-button>
+						</span>
+					</template>
+				</el-dialog>
+
 			</div>
 
 			<!-- 顶部右侧展示信息 -->
@@ -56,10 +83,10 @@
 					<el-input v-model="row.score" placeholder="Please input" @change="scoreChange(row.score, row.userId)" />
 				</template>
 			</el-table-column>
-			<el-table-column prop="ispay" label="缴费状态" width="120" align="center">
+			<el-table-column prop="isPay" label="缴费状态" width="220" align="center">
 				<template #="{ row }">
-					<el-tag v-if="row.ispay" type="success">已支付</el-tag>
-					<el-tag v-else type="danger">未支付</el-tag>
+					<el-tag v-if="row.isPay == '1'" type="success" @click="changeToUnPay(row.userId)">已支付</el-tag>
+					<el-tag v-else type="danger" @click="changeToPay(row.userId)">未支付</el-tag>
 				</template>
 			</el-table-column>
 
@@ -80,15 +107,21 @@
 
 import { onMounted, ref } from "vue";
 // 获取课程相关接口
-import {
-	reqGetCourseBySt,
-	reqGetAllPublishCourse
-} from "@/api/course";
-
+import { reqGetCourseBySt, reqGetAllPublishCourse } from "@/api/course";
 // 引入教师相关接口
 import { reqGetTeacherList } from "@/api/teacher";
 // 引入班级管理相关接口
-import { reqClassTeacher, reqUpdateClassTeacher, reqGetClassStudent, reqUpdateStudentScore } from '@/api/lesson'
+import {
+	reqClassTeacher,
+	reqUpdateClassTeacher,
+	reqGetClassStudent,
+	reqUpdateStudentScore,
+	reqAddClassStudent,
+	reqRemoveClassStudent,
+	reqUpdatePayStutas
+} from '@/api/lesson'
+// 引入学生相关接口
+import { reqGetStudentList } from "@/api/student";
 
 import { ElMessage } from "element-plus";
 
@@ -108,18 +141,21 @@ let classStudentArr = ref([]);
 let classPlace = ref()
 // 上课时间
 let classTime = ref()
-
 // 级联选择器绑定值
 let cascaderValue = ref<string[]>([]);
 // 已发布课程数组
 let publishCourseArr = ref([])
-
 // 选择器绑定的查看班级
 let selectLesson = ref()
+// 当前班级名称
+let className = ref()
 // 管理班级教师对话框开关
 let teacherDialogVisible = ref(false)
+// 添加学生对话框开关
+let studentDialogVisible = ref(false)
 // 是否正在按条件查询标志
 let isConditonFlag = ref(false)
+
 
 
 
@@ -137,16 +173,37 @@ let teachersIdArr = ref([])
 // #endregion ======================= end =======================
 
 
-// #region ==================表格多选功能区（学生批量删除）===========
+// #region ==================表格多选功能区（学生批量删除）有Bug ===========
 // 是否选择了表格的某一行标识
 let selectFlag = ref(false)
 import { ElTable } from 'element-plus'
+import { el } from "element-plus/es/locale";
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 // 删除学生
-const removeStudent = () => {
+const removeStudent = async () => {
 	let res = multipleTableRef.value!.getSelectionRows()
-	console.log(res);
+	// 整理为发送请求所需格式
+	const students = res.map((item: any) => {
+		return {
+			id: item.userId
+		}
+	})
+	console.log(students);
+
+	try {
+		// 发送删除请求
+		let removeRes = await reqRemoveClassStudent(selectLesson.value, students)
+
+		if (removeRes.code == 200) {
+			ElMessage.success('删除成功')
+		}
+		// 重新获取学生信息
+		await getClassStudents()
+	} catch (error) {
+		console.log(error);
+	}
 }
+
 // 表格选择行时触发回调
 const handelSelect = () => {
 	let res = multipleTableRef.value!.getSelectionRows()
@@ -155,17 +212,96 @@ const handelSelect = () => {
 	} else {
 		selectFlag.value = false
 	}
-
 }
 
 
 // #endregion ======================= end =======================
 
 
+// #region =========================== 批量添加学生 ==========================
+// 全部学生列表
+let allStudentArr = ref()
+// 未选择当前课程的学生列表
+let unselectCurrentClassStudentArr = ref()
+// 添加学生选择器所选的学生
+let selectClassStuArr = ref()
+// 添加班级学生按钮
+const addClassStudent = async () => {
+	try {
+		// 先获取所有学生信息
+		let res = await reqGetStudentList()
+		allStudentArr.value = res.data.items
+		// 进行过滤获得未选择当前课程的学生列表	 
+		unselectCurrentClassStudentArr.value = allStudentArr.value.filter((item: any) => {
+			return !classStudentArr.value.some((student) => student.userId == item.id)
+		})
+		console.log(unselectCurrentClassStudentArr.value);
+		studentDialogVisible.value = true
+
+	} catch (error) {
+		console.log(error);
+	}
+}
+// 确认添加学生按钮
+const confirmAddStu = async () => {
+	// 整理为发送请求所需要的格式
+	const students = selectClassStuArr.value.map((item: any) => {
+		return {
+			id: item
+		}
+	})
+	console.log('增加时的students', students);
+
+	try {
+		// 发送添加学生请求
+		await reqAddClassStudent(selectLesson.value, students)
+		ElMessage.success('添加成功')
+		// 重新获取学生信息
+		await getClassStudents()
+	} catch (error) {
+		console.log(error);
+		return
+	}
+	// 关闭学生对话框
+	studentDialogVisible.value = false
+	// 选择器清空
+	selectClassStuArr.value = null
+
+}
+
+
+//#endregion ======================= end ==========================
+
+
+// #region ======================= 更改缴费情况 ==============================
+// 设置学生支付状态为支付
+const changeToPay = async (id: number) => {
+	try {
+		await reqUpdatePayStutas(selectLesson.value, 1, id)
+		// 重新获取学生信息
+		await getClassStudents()
+		ElMessage.success('修改支付状态成功')
+	} catch (error) {
+
+	}
+}
+
+// 设置学生支付状态为未支付
+const changeToUnPay = async (id: number) => {
+	try {
+		await reqUpdatePayStutas(selectLesson.value, 0, id)
+		// 重新获取学生信息
+		await getClassStudents()
+		ElMessage.success('修改支付状态成功')
+	} catch (error) {
+
+	}
+}
+// #endregion ========================= end =============================
 
 // 查询班级详情按钮回调
 const btnSelectClass = async () => {
-	getClassStudents()
+	await getClassStudents()
 
 }
 
@@ -208,18 +344,18 @@ const teacherChange = async () => {
 		console.log(error);
 		ElMessage.error('更新班级教师失败')
 	}
-
-
-
-
-
 }
 
-
-// 封装获取课程方法
+// 封装获取班级详情方法
 const getClassStudents = async () => {
+	// 获取课程名称
+	className.value = publishCourseArr.value.find((item: any) => item.id == selectLesson.value)!.name
+
+	// 获取当前班级学生
 	let result = await reqGetClassStudent(selectLesson.value, pageNo.value, pageSize.value);
 	classStudentArr.value = result.data.items;
+
+	// 统计班级总数，上课地点，时间
 	total.value = result.data.counts;
 	if (total.value) {
 		classPlace.value = result.data.items[0].place
@@ -272,9 +408,6 @@ const scoreChange = async (score: number, userId: number) => {
 
 }
 
-
-
-
 // 当前页面改变触发回调
 const handleCurrentChange = async () => {
 	// 判断当前是否正在按条件查询
@@ -306,18 +439,7 @@ const handleSizeChange = async () => {
 
 
 
-// 点击查询按钮回调
-const btnInquire = async () => {
-	// 开启按条件查询课程标志
-	isConditonFlag.value = true
-	// 先获取当前条件下的课程总数
-	let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string)
-	total.value = result.data.counts
-	// 然后发分页请求
-	pageNo.value = 1
-	result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-	classStudentArr.value = result.data.items
-}
+
 
 
 
