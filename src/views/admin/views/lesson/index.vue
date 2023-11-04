@@ -23,8 +23,8 @@
 							<h4 :id="titleId" :class="titleClass">{{ className }}-- 教师管理</h4>
 						</div>
 					</template>
-					<el-transfer v-model="currentClassTeacher" :data="data" :titles="['全部教师', '授课教师']" :button-texts="['撤销', '选择']"
-						@change="teacherChange" />
+					<el-transfer v-model="currentClassTeacher" :data="data" :titles="['全部教师', '授课教师']"
+						:button-texts="['撤销', '选择']" @change="teacherChange" />
 					<template #footer>
 						<span class="dialog-footer">
 							<el-button @click="teacherDialogVisible = false">取消</el-button>
@@ -36,7 +36,8 @@
 				</el-dialog>
 
 				<!-- 添加班级学生按钮 -->
-				<el-button type="primary" :disabled="!selectLesson" @click="addClassStudent" style="margin: 10px 0px 10px 10px">添加班级学生</el-button>
+				<el-button type="primary" :disabled="!selectLesson" @click="addClassStudent"
+					style="margin: 10px 0px 10px 10px">添加班级学生</el-button>
 				<!-- 添加学生对话框 -->
 				<el-dialog v-model="studentDialogVisible" width="50%" center align-center>
 					<template #header="{ titleId, titleClass }">
@@ -78,12 +79,18 @@
 			<el-table-column prop="userName" label="学生名称" width="180" align="center" />
 			<el-table-column prop="age" label="年龄" show-overflow-tooltip align="center" />
 			<el-table-column prop="cellphone" label="电话" width="200" align="center" />
-			<el-table-column prop="score" label="成绩" width="120" align="center">
+			<el-table-column prop="score" label="成绩" width="120" align="center" sortable>
 				<template #="{ row }">
 					<el-input v-model="row.score" placeholder="Please input" @change="scoreChange(row.score, row.userId)" />
 				</template>
 			</el-table-column>
-			<el-table-column prop="isPay" label="缴费状态" width="220" align="center">
+			<el-table-column prop="isPay" label="缴费状态" width="220" align="center" :filter-method="filterPayStatus" :filters="[
+				{ text: '已支付', value: '1' },
+				{ text: '未支付', value: '0' },
+			]">
+				<template #header>
+					<span style="color: rgb(238, 238, 238);">缴费状态</span>
+				</template>
 				<template #="{ row }">
 					<el-tag v-if="row.isPay == '1'" type="success" @click="changeToUnPay(row.userId)">已支付</el-tag>
 					<el-tag v-else type="danger" @click="changeToPay(row.userId)">未支付</el-tag>
@@ -97,8 +104,8 @@
 		<!-- 分页器 -->
 		<div class="demo-pagination-block" style="margin: 10px 0">
 			<el-pagination v-model:current-page="pageNo" v-model:page-size="pageSize" :page-sizes="[5, 10, 20, 40]"
-				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total" @size-change="handleSizeChange"
-				@current-change="handleCurrentChange" />
+				:background="true" layout="total, sizes, prev, pager, next, jumper" :total="total"
+				@size-change="handleSizeChange" @current-change="handleCurrentChange" />
 		</div>
 	</div>
 </template>
@@ -177,7 +184,6 @@ let teachersIdArr = ref([])
 // 是否选择了表格的某一行标识
 let selectFlag = ref(false)
 import { ElTable } from 'element-plus'
-import { el } from "element-plus/es/locale";
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 // 删除学生
 const removeStudent = async () => {
@@ -297,6 +303,13 @@ const changeToUnPay = async (id: number) => {
 
 	}
 }
+
+// 按缴费情况进行表格筛选
+const filterPayStatus = (value: string, row: any) => {
+	return row.isPay == value
+}
+
+
 // #endregion ========================= end =============================
 
 // 查询班级详情按钮回调

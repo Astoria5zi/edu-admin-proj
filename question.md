@@ -197,3 +197,11 @@
 2. 完成学生批量添加
 3. 学生批量删除有bug,感觉发请求没问题，找不到问题，非常奇怪
 4. 完成更改缴费情况功能
+
+### 11.4
+1. 完成批量删除功能
+   - 踩坑：axios的删除操作和post和put不同。post和put有三个参数，但是delete只有两个参数：url和config，data在config中
+   - 所以如果删除操作携带参数，应该把参数封装在{data:params}这样写请求
+   - 如：request.delete<any, any>(API.REMOVESTUDENT_URL + `courseId=${courseId}`, **{ data: students }**)
+2. 完成按成绩顺序排序
+3. 完成按支付状态查询学生

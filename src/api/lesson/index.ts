@@ -50,7 +50,7 @@ export const reqUpdateStudentScore = (courseId: number, score: number, userId: n
 export const reqAddClassStudent = (courseId: number, students: any) => request.post<any, any>(API.ADDCLASSSTUDENT_URL + `courseId=${courseId}`, students)
 
 // 删除班级学生接口
-export const reqRemoveClassStudent = (courseId: number, students: any) => request.delete<any, any>(API.REMOVESTUDENT_URL + `courseId=${courseId}`, students)
+export const reqRemoveClassStudent = (courseId: number, students: any) => request.delete<any, any>(API.REMOVESTUDENT_URL + `courseId=${courseId}`, { data: students })
 
 // 修改学生缴费接口
 export const reqUpdatePayStutas = (courseId: number, payCode: any, userId: number) => request.put<any, any>(API.UPDATEPAYSTATUS_URL + `courseId=${courseId}&payCode=${payCode}&userId=${userId}`)
