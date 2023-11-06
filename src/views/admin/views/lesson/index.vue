@@ -2,7 +2,7 @@
 	<!-- 展示课程列表以及操作 -->
 	<div v-if="!isAdd" class="class-table">
 		<!-- 顶部信息 -->
-		<div class="class-table-header">
+		<div class="class-table-header" style="margin-bottom: 10px;height: 8vh;">
 			<!-- 左侧操作 -->
 			<div class="header-left">
 				<!-- 班级的级联选择器 -->
@@ -63,9 +63,45 @@
 
 			<!-- 顶部右侧展示信息 -->
 			<div class="header-right">
+				<el-descriptions v-if="className" class="margin-top" :column="2" border style="width: 100%;">
+		
+					<el-descriptions-item>
+						<template #label>
+							<div class="cell-item">
+								<el-icon>
+									<location />
+								</el-icon>
+								上课地点
+							</div>
+						</template>
+						<span v-if="classPlace">{{ classPlace }}&nbsp;&nbsp;</span>
+					</el-descriptions-item>
+					<el-descriptions-item>
+						<template #label>
+							<div class="cell-item">
+								<el-icon>
+									<tickets />
+								</el-icon>
+								上课时间
+							</div>
+						</template>
+						<span v-if="classTime">{{ classTime }}</span>
+					</el-descriptions-item>
+					<el-descriptions-item>
+						<template #label>
+							<div class="cell-item">
+								<el-icon>
+									<office-building />
+								</el-icon>
+								授课教师
+							</div>
+						</template>
+						<span v-for="item in currentClassTeacherNameArr">{{ item }}&nbsp</span>
+					</el-descriptions-item>
+				</el-descriptions>
 				<!-- 展示课程地点和时间 -->
-				<span v-if="classPlace">上课地点：{{ classPlace }}&nbsp;&nbsp;</span>
-				<span v-if="classTime">上课时间：{{ classTime }}</span>
+				<!-- <span v-if="classPlace">上课地点：{{ classPlace }}&nbsp;&nbsp;</span>
+				<span v-if="classTime">上课时间：{{ classTime }}</span> -->
 			</div>
 		</div>
 
@@ -77,9 +113,9 @@
 			<el-table-column prop="userId" label="ID" width="60" align="center"></el-table-column>
 			<el-table-column prop="no" label="学号" width="260" align="center"></el-table-column>
 			<el-table-column prop="userName" label="学生名称" width="180" align="center" />
-			<el-table-column prop="age" label="年龄" show-overflow-tooltip align="center" />
-			<el-table-column prop="cellphone" label="电话" width="200" align="center" />
-			<el-table-column prop="score" label="成绩" width="120" align="center" sortable>
+			<el-table-column prop="age" label="年龄" show-overflow-tooltip width="200" align="center" />
+			<el-table-column prop="cellphone" label="电话" align="center" />
+			<el-table-column prop="score" label="成绩" width="180" align="center" sortable>
 				<template #="{ row }">
 					<el-input v-model="row.score" placeholder="Please input" @change="scoreChange(row.score, row.userId)" />
 				</template>
@@ -96,7 +132,6 @@
 					<el-tag v-else type="danger" @click="changeToPay(row.userId)">未支付</el-tag>
 				</template>
 			</el-table-column>
-
 		</el-table>
 
 		<el-button @click="removeStudent()" type="danger" :disabled="!selectFlag" size="small"
@@ -163,9 +198,6 @@ let studentDialogVisible = ref(false)
 // 是否正在按条件查询标志
 let isConditonFlag = ref(false)
 
-
-
-
 // #region ================== 班级教师穿梭框选项配置 =================
 interface Option {
 	key: number
@@ -173,8 +205,10 @@ interface Option {
 	disabled: boolean
 }
 const data = ref<Option[]>()
-// 当前班级负责教师
+// 当前班级负责教师id
 const currentClassTeacher = ref()
+// 当前班级教师名称数组
+let currentClassTeacherNameArr = ref()
 // 所有教师数组
 let teachersIdArr = ref([])
 // #endregion ======================= end =======================
@@ -239,7 +273,7 @@ const addClassStudent = async () => {
 		allStudentArr.value = res.data.items
 		// 进行过滤获得未选择当前课程的学生列表	 
 		unselectCurrentClassStudentArr.value = allStudentArr.value.filter((item: any) => {
-			return !classStudentArr.value.some((student) => student.userId == item.id)
+			return !classStudentArr.value.some((student: any) => student.userId == item.id)
 		})
 		console.log(unselectCurrentClassStudentArr.value);
 		studentDialogVisible.value = true
@@ -320,17 +354,9 @@ const btnSelectClass = async () => {
 
 // 管理班级教师按钮回调
 const btnAdminClassTeacher = async () => {
-	try {
-		let res = await reqClassTeacher(selectLesson.value)
-		// 给当前教师数组赋值
-		currentClassTeacher.value = res.data.map((item: any) => {
-			return item.teacherId
-		})
-		// 打开管理教师对话框
-		teacherDialogVisible.value = true
-	} catch (error) {
-		console.log(error);
-	}
+	// 打开管理教师对话框
+	teacherDialogVisible.value = true
+
 }
 
 // 穿梭框右侧元素改变时的回调
@@ -346,6 +372,12 @@ const teacherChange = async () => {
 			teacherId: teacherId,
 			teacherName: foundTeacher ? foundTeacher.name : "" // 如果找到对应教师名字则返回，否则返回空字符串
 		};
+	});
+
+	// 获取教师名字
+	currentClassTeacherNameArr.value = currentClassTeacher.value.map((teacherId: number) => {
+		const foundTeacher = teachersIdArr.value.find(teacher => teacher.id === teacherId);
+		return foundTeacher ? foundTeacher.name : "" // 如果找到对应教师名字则返回，否则返回空字符串
 	});
 
 	// 整理完毕当前班级教师后，发起更新请求
@@ -367,6 +399,18 @@ const getClassStudents = async () => {
 	// 获取当前班级学生
 	let result = await reqGetClassStudent(selectLesson.value, pageNo.value, pageSize.value);
 	classStudentArr.value = result.data.items;
+
+	// 获取当前班级教师
+	let res = await reqClassTeacher(selectLesson.value)
+	// 给当前教师数组赋值
+	currentClassTeacher.value = res.data.map((item: any) => {
+		return item.teacherId
+	})
+	// 获取当前班级教师名称
+	currentClassTeacherNameArr.value = res.data.map((item: any) => {
+		return item.teacherName
+	})
+
 
 	// 统计班级总数，上课地点，时间
 	total.value = result.data.counts;
@@ -407,12 +451,14 @@ onMounted(async () => {
 	// 获取所有教师信息(用于班级新增教师选择教师)
 	await getAllTeacherInfo()
 
+
 });
 
 // 成绩输入框改变时的回调
 const scoreChange = async (score: number, userId: number) => {
 	try {
 		await reqUpdateStudentScore(selectLesson.value, score, userId)
+		ElMessage.success("更新成绩成功")
 	} catch (error) {
 		console.log(error);
 		ElMessage.error("更新成绩失败")
@@ -460,11 +506,7 @@ const handleSizeChange = async () => {
 
 
 
-
 </script>
-    
-    
-    
     
     
     

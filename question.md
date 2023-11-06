@@ -205,3 +205,8 @@
    - 如：request.delete<any, any>(API.REMOVESTUDENT_URL + `courseId=${courseId}`, **{ data: students }**)
 2. 完成按成绩顺序排序
 3. 完成按支付状态查询学生
+
+### 11.5
+1. 修复课程界面无照片情况
+>>> 修改课程时，教师设置为非必需
+>>> 增加按课程查询订单功能

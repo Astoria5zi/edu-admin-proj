@@ -193,7 +193,7 @@ const chooseCourse = async (id: number) => {
 
 	try {
 		// 这里因为还没有学生端，所以都用28号学生来模拟发起选课请求
-		let result = await reqStuChooseCourse(id, 28)
+		let result = await reqStuChooseCourse(id, 63)
 		if (result.code == 200) {
 			ElMessage.success("选课成功")
 			getCourses();

@@ -123,13 +123,14 @@
       <el-form-item label="课程描述：">
         <el-input type="textarea" v-model="newCourse.description" />
       </el-form-item>
+
       <el-form-item label="课程照片：">
         <el-upload class="avatar-uploader" :http-request="uploadPic" :show-file-list="false">
           <img v-if="newCourse.pic" class="avatar" :src="newCourse.pic" />
           <el-icon v-else class="avatar-uploader-icon">
             <Plus />
           </el-icon>
-        </el-upload>
+                  </el-upload>
       </el-form-item>
       <el-form-item>
         <el-button v-if="idEdit" type="primary" @click="onEdit(ruleFormRef)">修改课程</el-button>
@@ -197,7 +198,6 @@ import { reqGetTeacherList } from "@/api/teacher";
 import { reqUploadFile } from '@/api/common'
 // 引入表单校验格式
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import { el } from "element-plus/es/locale";
 
 // 当前页码
 let pageNo = ref(1);
@@ -239,7 +239,7 @@ let newCourse = ref({
   "mt": "",
   "st": "",
   "name": "",
-  "pic": "无",
+  "pic": "",
   "users": "初级人员",
   "description": "",
   "mtName": "",
@@ -263,8 +263,7 @@ const rules = reactive({
   description: [{ required: true, message: '请输入课程描述', trigger: 'blur' }],
   mtName: [{ required: true, message: '请输入MT名称', trigger: 'blur' }],
   stName: [{ required: true, message: '请输入ST名称', trigger: 'blur' }],
-  teacherId: [{ required: true, message: '请输入教师ID', trigger: 'blur' }],
-  teacherName: [{ required: true, message: '请输入教师姓名', trigger: 'blur' }]
+
 });
 // 树状课程数组
 let treeNodeCourseArr = ref([]);

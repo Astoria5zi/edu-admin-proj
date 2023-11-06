@@ -3,7 +3,7 @@
       <canvas id="s-canvas" :width="contentWidth" :height="contentHeight"></canvas>
     </div>
   </template>
-  <script>
+  <script lang="ts">
     export default {
       name: 'SIdentify',
       props: {
@@ -62,11 +62,11 @@
       },
       methods: {
         // 生成一个随机数
-        randomNum(min, max) {
+        randomNum(min:number, max:number) {
           return Math.floor(Math.random() * (max - min) + min)
         },
         // 生成一个随机的颜色
-        randomColor(min, max) {
+        randomColor(min:number, max:number) {
           let r = this.randomNum(min, max)
           let g = this.randomNum(min, max)
           let b = this.randomNum(min, max)
@@ -74,7 +74,7 @@
         },
         drawPic() {
           let canvas = document.getElementById('s-canvas')
-          let ctx = canvas.getContext('2d')
+          let ctx = canvas!.getContext('2d')
           ctx.textBaseline = 'bottom'
           // 绘制背景
           ctx.fillStyle = this.randomColor(this.backgroundColorMin, this.backgroundColorMax)
@@ -86,7 +86,7 @@
           this.drawLine(ctx)
           this.drawDot(ctx)
         },
-        drawText(ctx, txt, i) {
+        drawText(ctx:any, txt:any, i:any) {
           ctx.fillStyle = this.randomColor(this.colorMin, this.colorMax)
           ctx.font = this.randomNum(this.fontSizeMin, this.fontSizeMax) + 'px SimHei'
           let x = (i + 1) * (this.contentWidth / (this.identifyCode.length + 1))
@@ -100,7 +100,7 @@
           ctx.rotate(-deg * Math.PI / 180)
           ctx.translate(-x, -y)
         },
-        drawLine(ctx) {
+        drawLine(ctx:any) {
           // 绘制干扰线
           for (let i = 0; i < 5; i++) {
             ctx.strokeStyle = this.randomColor(this.lineColorMin, this.lineColorMax)
@@ -110,7 +110,7 @@
             ctx.stroke()
           }
         },
-        drawDot(ctx) {
+        drawDot(ctx:any) {
           // 绘制干扰点
           for (let i = 0; i < 80; i++) {
             ctx.fillStyle = this.randomColor(0, 255)

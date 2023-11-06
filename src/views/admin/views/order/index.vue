@@ -1,15 +1,18 @@
 <template>
 	<!-- 展示课程列表以及操作 -->
 	<div class="teacher-table">
+		<!-- 班级的级联选择器 -->
+		<el-select v-model="selectLesson" placeholder="请选择订单班级" clearable>
+			<el-option v-for=" item  in  publishCourseArr " :key="item.id" :label="item.name" :value="item.id" />
+		</el-select>
 		<!-- 课程查询按钮 -->
 		<el-button type="primary" @click="btnInquire" style="margin: 10px 0px 10px 10px">查询</el-button>
 
-		<!-- 展示课程列表 -->
 
 		<!-- 自定义表头颜色方式1：elment自带的属性，传入配置对象就行 -->
 		<!-- <el-table :data="ordersArr" border style="width: 100%" max-height="700"
 			:header-cell-style="{ background: '#eef1f6' }"> -->
-		<el-table :data="ordersArr" border style="width: 100%" max-height="700" stripe >
+		<el-table :data="ordersArr" border style="width: 100%" max-height="700" stripe>
 			<el-table-column label="序号" type="index" algin="center" width="60" align="center"></el-table-column>
 			<el-table-column prop="id" label="ID" width="60" align="center"></el-table-column>
 			<el-table-column prop="status" label="状态" width="100" align="center">
@@ -82,6 +85,8 @@
 import { onMounted, ref } from "vue";
 // 引入订单接口
 import { reqGetOrderList, reqUpdateOrder, reqGetOrderInfoById, reqDeleteOrderById } from '@/api/order'
+// 引入课程相关接口
+import { reqGetAllPublishCourse } from "@/api/course";
 import { ElMessage } from "element-plus";
 import { InfoFilled } from '@element-plus/icons-vue'
 // 当前页码
@@ -94,6 +99,8 @@ let total = ref(0);
 let isEdit = ref(false)
 // 存储订单数组
 let ordersArr = ref([])
+// 已发布课程数组
+let publishCourseArr = ref([])
 // 是否正在按条件查询标志
 let isConditonFlag = ref(false)
 // 订单表单对象
@@ -110,22 +117,6 @@ let orderForm = ref({
 	"userName": ""
 })
 
-// 封装清空表单对象方法
-const clearFormObj = () => {
-	orderForm.value = {
-		"courseId": '',
-		"createDate": "",
-		"orderDescrip": "",
-		"orderName": "",
-		"orderType": "",
-		"payDate": "",
-		"status": "",
-		"totalPrice": 0,
-		"userId": 0,
-		"userName": ""
-	}
-}
-
 
 // 封装获取订单方法
 const getOrders = async () => {
@@ -139,9 +130,17 @@ const getOrders = async () => {
 
 }
 
+// 封装获取所有已发布课程方法
+const getAllPublishCourse = async () => {
+	// 此处暂时用1000代表获取所有课程信息
+	let res = await reqGetAllPublishCourse(1, 1000)
+	publishCourseArr.value = res.data.items
+}
+
 // 组件挂载时获课程师信息
 onMounted(async () => {
-	getOrders();
+	await getOrders();
+	await getAllPublishCourse()
 
 });
 
@@ -150,8 +149,7 @@ const handleCurrentChange = async () => {
 	// 判断当前是否正在按条件查询
 	// 如果是，则调用按条件查询课程的接口
 	if (isConditonFlag.value) {
-		let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-		coursesArr.value = result.items
+
 	}
 	// 否则调用基本获取课程的接口
 	else {
@@ -164,8 +162,7 @@ const handleSizeChange = async () => {
 	// 判断当前是否正在按条件查询
 	// 如果是，则调用按条件查询课程的接口
 	if (isConditonFlag.value) {
-		let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-		coursesArr.value = result.items
+
 	}
 	// 否则调用基本获取课程的接口
 	else {
@@ -176,15 +173,7 @@ const handleSizeChange = async () => {
 
 // 点击查询按钮回调
 const btnInquire = async () => {
-	// 开启按条件查询课程标志
-	isConditonFlag.value = true
-	// 先获取当前条件下的课程总数
-	let result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string)
-	total.value = result.data.counts
-	// 然后发分页请求
-	pageNo.value = 1
-	result = await reqGetCourseBySt(cascaderValue.value.at(-1) as string, pageNo.value, pageSize.value)
-	coursesArr.value = result.data.items
+
 }
 
 // 点击修改按钮回调
